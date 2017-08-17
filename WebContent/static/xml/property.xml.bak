@@ -1,0 +1,12 @@
+<?xml version="1.0"?>  
+
+<root>
+	<!-- 主机IP地址 -->
+	<serverPath>http://localhost:8080</serverPath> 
+	<!-- 数据库连接URL -->
+	<url>jdbc:oracle:thin:@localhost:1521:orcl</url>
+	<!-- 数据库连接用户名 -->
+	<username>SYBDCSXK</username>
+	<!-- 数据库连接密码 -->
+	<password>SYBDCSXK</password>
+</root>

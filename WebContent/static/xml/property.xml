@@ -1,0 +1,21 @@
+<?xml version="1.0"?>  
+
+<root>
+	<!-- 主机IP地址 -->
+	<serverPath>http://localhost:8080</serverPath> 
+	
+	<!-- 数据库连接URL -->
+	<url>jdbc:oracle:thin:@172.18.0.147:1521:bdctestsvr</url>
+	
+	<!-- 数据库连接用户名 -->
+	<username>xzbdcsxk</username>
+	
+	<!-- 数据库连接密码 -->
+	<password>xzbdcsxk</password>
+
+	<!-- mongoDb的连接地址 -->
+	<mongodbUrl>localhost</mongodbUrl>
+	
+	<!--异常log日志的地址  -->
+	<logPath>D:/logError</logPath>
+</root>

@@ -1,0 +1,6 @@
+@CHARSET "UTF-8";
+/* 修改默认的行高 */
+ .datagrid-row {
+        height: 32px;
+    }
+
