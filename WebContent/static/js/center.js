@@ -1,11 +1,32 @@
-/*$(function(){*/
+//使用下来框的注意事项  必须先进行js的初始化(设置属性)
+$('#reqStr').combobox({  
+	editable:false,
+}); 
+//缓存 回写(之后证明 不需要)
+	$('#ss').searchbox({ 
+		prompt:'输入后查询', 
+		width:"300px",
+		height:"30px",  
+		//value:topKeyWords,
+		searcher:function(value){ 
+			//如果为空 则清空did数据  
+			if(!value||""==value.trim()){
+				showMsg("提示信息", "请输入关键字后搜索", "warning");
+			}else{
+				var category = $('#reqStr').combobox('getValue');
+				$("#did").datagrid("reload",{category:category,keyword:value});
+			}
+			}, 
+		}); 
 
+
+	
 //控件显示
 $("#did").datagrid({
 	url: 'getDataByKeywordAndPage',
-	fit:true ,
+	fit:false ,
 	rownumbers:true,
-	title:"查询结果",
+	title:"幢信息查询结果",
 	singleSelect: false,
 	fitColumns:false,
 	striped:true,
@@ -16,11 +37,58 @@ $("#did").datagrid({
 	multiSort:false,
 	selectOnCheck:true,
 	checkOnSelect:true,
-	onDblClickRow: function(index,row){
+	onRowContextMenu: function(e, index, row){ //右键
+		//选中该行  
+		$('#did').datagrid('selectRow', index);
+		 $('#mm').menu('show', {
+	            left: e.pageX,
+	            top: e.pageY
+	        });
+		 e.preventDefault(); 
+		//右键菜单  
+		$('#mm').menu({    
+			    onClick:function(item){
+			    	console.log(item);
+			        if(item.text=='查看幢下户信息'){
+			        	//和查看相同
+			        	showWindow('#singleWind','单户信息详情');
+			    		showDid3(row,'100%');
+			        }else if(item.text=='刷新'){
+			        	reloadDatagrid('#did');
+			        }else if(item.text=='删除'){
+			        	deleteZ('#did');
+			        }else if(item.text=='取消选择'){
+			        	cleanAllCheck('#did');
+			        } 
+			        
+			    }    
+			});	
+		 
+	},
+	onDblClickRow: function(index,row){				//双击时
 		showWindow('#singleWind','单户信息详情');
 		showDid3(row,'100%');
-		
-	},	
+	},
+	onLoadSuccess: function(data){
+    	if(data.total==0){
+    		showMsg("提示信息", "根据关键字未查询到相关信息!!", "info");
+    	}
+    	$('#did').datagrid('uncheckAll');
+    },
+	
+	onBeforeLoad: function (param) {  //查看是否是首次加载 如果是 则 不执行url 加载数据
+        var firstLoad = $(this).attr("firstLoad");  
+        if (firstLoad == "false" || typeof (firstLoad) == "undefined")  
+        {  
+            $(this).attr("firstLoad","true");  
+            return false;  
+        }  
+        return true;  
+    },
+    
+    onLoadError: function(){
+    	showMsg("提示信息", "加载远程数据时出错,详情查看日志!!", "warning");
+    },
 	columns: [columZ],
 	toolbar: [{
 		text:'比较',
@@ -54,6 +122,30 @@ $("#did").datagrid({
 			cleanAllCheck('#did');
 		}
 	},
+	'-',
+	{
+		text:'合并至下方幢',
+		iconCls:'icon-down',	
+		handler: function(){
+			toMergeZ(1);
+		}
+	},
+	'-',
+	{
+		text:'合并至上方幢',
+		iconCls:'icon-up',	
+		handler: function(){
+			toMergeZ(-1);
+	}
+	},
+	'-',{
+		id:'hwzz',
+		text:'户幢挂接',
+		iconCls: 'icon-building',
+		handler: function(){
+			showHZGJ();
+		}
+	},
 	'-',{
 		text:'刷新',
 		iconCls: 'icon-reload',
@@ -61,26 +153,202 @@ $("#did").datagrid({
 			reloadDatagrid('#did');
 		}
 	}
+	
 	]
 
 })
 
-//刷新表格
+
+//户幢挂接  
+function showHZGJ(){
+		var m ;
+	//查看按钮当前状态	
+	if($("a[id='hwzz'").children("span:eq(0)").children("span:eq(0)").get()[0].innerText=="户幢挂接"){
+		//1.改变搜索框上层 div可见性 	
+		$("#findDivH").css("display","block");
+		//设置表格上的div可见
+		$('#findHinfo').css('display','block');
+		
+		//2.渲染搜索框  
+		$('#ssH').searchbox({ 
+			prompt:'输入户坐落', 
+			width:"300px",
+			height:"30px",  
+			//value:topKeyWords,
+			searcher:function(value){ 
+				//如果为空 则清空did数据  
+				if(!value||""==value.trim()){
+					showMsg("提示信息", "请输入户坐落后搜索", "warning");
+				}else{				
+					m = $('#ssH').searchbox('getValue');
+					
+					//重新加载数据 带参数
+					$('#didGJ').datagrid('reload',{keyword: m,});
+				}
+				}, 
+			}); 
+		$('#ssH').searchbox('clear');  
+		
+		//3.改变按键名称
+		$("a[id='hwzz'").children("span:eq(0)").children("span:eq(0)").get()[0].innerText='隐藏户幢挂接';
+		//4.显示表格并加载数据  
+			$("#didGJ").datagrid({
+				url: 'getHouseData',
+				fit:false ,
+				rownumbers:true,
+				title:"户信息查询结果",
+				singleSelect: false,
+				fitColumns:false,
+				striped:true,
+				autoRowHeight:true,
+				nowrap: true,	
+				pagination:true,
+				remoteSort:true,//服务器排序
+				multiSort:false,
+				selectOnCheck:true,
+				checkOnSelect:true,
+				columns: [columH],
+				onDblClickRow: function(index,row){				//双击时
+					EditH(index,"#didGJ",row);
+				},
+				onRowContextMenu: function(e, index, row){ //右键
+					//选中该行  
+					$('#didGJ').datagrid('selectRow', index);
+					//查看该行的lsztybm
+					if(row.LSZTYBM&&(!$('#mmGJ').menu('findItem', '查看幢'))){
+						$('#mmGJ').menu('appendItem', {
+							id:'findZ',
+							text: '查看幢',
+							iconCls: 'icon-search',
+						});
+					}else if(!row.LSZTYBM&&($('#mmGJ').menu('findItem', '查看幢'))){
+						//alert("进入删除该项目");
+						//获得当前的itemID
+						//console.log($('#mmGJ'));
+						var itemEl = $('#findZ')[0];  // the menu item element
+						var item = $('#mm').menu('removeItem',itemEl);
+						//alert("已删除");
+					}
+					 $('#mmGJ').menu('show', {
+				            left: e.pageX,
+				            top: e.pageY
+				        });
+					 e.preventDefault(); 
+					//右键菜单  
+					$('#mmGJ').menu({    
+						    onClick:function(item){
+						        if(item.text=='查看'||item.text=='编辑'){
+						        	//和查看相同
+						        	EditH(index,"#didGJ",row);
+						        }else if(item.text=='刷新'){
+						        	reloadDatagrid('#didGJ');
+						        }else if(item.text=='取消选择'){
+						        	cleanAllCheck('#didGJ');
+						        }else if(item.text=='查看幢'){
+						        	reSend(row.LSZTYBM);  delHinfo
+						        }else if(item.text=='删除'){
+						        	delHinfo('#didGJ');
+						        }  
+						    }    
+						});	
+				},
+				onBeforeLoad: function (param) {  //查看是否是首次加载 如果是 则 不执行url 加载数据
+			        //如果是第一次加载   reload的时候 首先进行的是 无参的访问 会出现一次 垃圾访问(bad param)
+					 m = $('#ssH').searchbox('getValue');          
+					if(m){
+						return true;
+					}else{
+						return false;
+					}
+			    },
+			    toolbar: [{
+					text:'挂接',
+					iconCls: 'icon-Hook',
+					handler:function(){
+						 toGj();
+					}
+			    },
+			    '-',{
+					text:'取消选择',
+					iconCls: 'icon-clean',
+					handler: function(){
+						cleanAllCheck('#didGJ');
+					}
+				},
+			    '-',{
+					text:'刷新',
+					iconCls: 'icon-reload',
+					handler: function(){
+						reloadDatagrid('#didGJ');
+					}
+				}
+			    ]
+			});
+			//加载本地数据 清空 表格缓存  
+			$('#didGJ').datagrid('loadData',{"total":0,"rows":[]});
+	}else{
+		//1.隐藏表格  
+		$('#findDivH').css('display','none');
+		$('#findHinfo').css('display','none');
+		//改变按钮内容
+		$("a[id='hwzz'").children("span:eq(0)").children("span:eq(0)").get()[0].innerText='户幢挂接';
+		//清除搜索框的值  
+	
+;	}	
+		
+//挂接  
+function toGj(){
+	//查看did是否有行信息选中;
+	var rows1 = getAllselect('#didGJ');
+	var rows2 = getAllselect('#did');
+	//判断条数表格一至允许选择一行 表格二至允许选择一行
+	if((rows1.length>=1)&&(rows2.length==1)){
+		//查看当前户信息的lsztybm是否存在
+		
+			//存在的提示内容
+			$.messager.confirm('确认对话框',"当前选择了"+rows1.length+"户进行挂接幢信息,是否确认该操作?", function(r) {
+	            if (r){
+	            	//进行更新挂接
+	            	rowIndex=$('#didGJ').datagrid('getRowIndex',rows2[0]);
+	            	ajaxToTransfer(rows2[0].TSTYBM,rows1,'户幢挂接',rowIndex);
+	         	   }
+			});
+			//不存的提示内容
+			
+		
+			
+		
+	}else{
+		showMsg('友情提示','<strong>挂接幢使用须知:</strong></br>1.选择一条幢信息;</br>2.选择一条户信息;</br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.点击<strong>挂接按钮</strong></br>注:当前选择无效,请按要求重新选择!','warning')
+	}
+}
+	
+};
+
+//点击户链接打开的详情页  
+function reSend(value){
+	
+	$("#did").datagrid("reload",{category:'f2',keyword:value});
+}
+
+//刷新某个表格
 function reloadDatagrid(id){
 	$(id).datagrid('reload');
 }
 
-//获得选择行
+//获得某个表格的所有选择行
 function getAllselect(id){
 	var rows = '';
 	rows = $(id).datagrid('getSelections');
 	return rows;
 }
 
+//弹出框
 function showMsg(msgTitle,msg,icon){
 	$.messager.alert(msgTitle,msg,icon);
 }
 
+//打开某个窗口
 function showWindow(id,title){
 	$(id).window({
 		module:true,
@@ -90,6 +358,71 @@ function showWindow(id,title){
 	});	
 }
 
+//合并幢  
+function toMergeZ(num){
+	//验证是否选择了两条数据
+	var rowsS = getAllselect('#did');//去合并
+	if(rowsS.length<=1){
+		showMsg('友情提示','未选择有效行','warning')
+	}else if(rowsS.length>2){
+		showMsg('友情提示','合并幢操作仅允许操作两条,请取消多选!','warning')
+	}else{
+		//获得两条tstybm
+		//第一条被选择记录
+		s1=rowsS[0].TSTYBM 
+		//第二条被选择记录
+		s2=rowsS[1].TSTYBM
+		
+		rowNum1=$('#did').datagrid('getRowIndex',rowsS[0]);
+		rowNum2=$('#did').datagrid('getRowIndex',rowsS[1]);
+		alert(rowNum1+"/"+rowNum2);
+		
+		//刷新表格
+		$('#did').datagrid('reload');
+		
+		//高亮某一行
+		
+    	//$('#did').datagrid('checkRow',((num==1)?(rowNum2-1):rowNum1));
+		//timeoutMsg("信息提醒","幢信息合并成功!",3000,'slide');
+		
+		
+		//console.log(opts);
+		//发送ajax进行合并幢
+		$.messager.confirm('确认对话框',"幢坐落为:<strong>"+(num==1?(rowsS[0].FWZL):(rowsS[1].FWZL))+"</strong>的该条幢下所有户将要被转移且该条幢信息将要被删除,是否确定该操作?", function(r) {
+            if (r){
+            	$.ajax({
+    				url:'toMergeZ',
+    				type:'post',
+    				dataType:'json',
+    				data:{
+    					tTstybm:(num==1?s2:s1),//去合并
+    					bTstybm:(num==1?s1:s2),//被合并删除
+    				},
+    				success:function(data){
+    					if(data.msg==1){
+    						//刷新表格
+    						$('#did').datagrid('reload');
+    						
+    						//高亮某一行
+    						$('#did').datagrid('options').onLoadSuccess=function(){
+								$('#did').datagrid('selectRow',(num==1)?(rowNum2-1):rowNum1);
+							}; 
+    						timeoutMsg("信息提醒","幢信息合并成功!",3000,'slide');
+    					}else{
+    						showMsg('错误提示','合并信息时,后台程序出错数据已成功回滚,请查看相应日志!','warning')
+    					}
+    				},
+    				error:function(data){
+    					alert('失败');
+    				}
+    			})
+         	   }
+            }) 	
+	
+	}
+}
+
+//户列表的表格1
 function showDid1(row,row2){
 	keywords1="";
 	lsztybm1=row.TSTYBM;
@@ -160,7 +493,7 @@ function showDid1(row,row2){
 		}
 	}, 	
 	{
-		text:'转移型下合并',
+		text:'转移&合并至下方户',
 		iconCls:'icon-todown',
 		handler: function(){
 			toMerge("#windDid1","#windDid2",0);
@@ -197,7 +530,8 @@ function showDid1(row,row2){
 
 	})
 }
-	
+
+//户列表的表格二
 function showDid2(row,row1,height){
 		keywords2="";
 		lsztybm2=row.TSTYBM;
@@ -249,7 +583,6 @@ function showDid2(row,row1,height){
 			            	 ajaxToTransfer(row1.TSTYBM,rows);
 			           	   }
 			              }) 	
-					
 				}
 				
 			}
@@ -270,7 +603,7 @@ function showDid2(row,row1,height){
 			}
 		},
 		{
-			text:'转移型上合并',
+			text:'转移&合并至上方户',
 			iconCls:'icon-toup',	
 			handler: function(){
 				toMerge("#windDid2","#windDid1",0);
@@ -312,7 +645,7 @@ function showDid3(row,height){
 	lsztybm3=row.TSTYBM;
 	//户信息的详情页数据表格
 	$('#singlePan').panel({
-		title:row.FWZL+'>'+row.ZDTYBM,
+		title:row.FWZL+'>'+row.TSTYBM,
 		width:'100%',
 		height:height,
 	});
@@ -337,7 +670,7 @@ function showDid3(row,height){
 		multiSort:false,//禁止多列排序允许 目前该工具只做到可以单列排序 多列允许排序但只遵循单列规则
 		columns: [columH],
 		onDblClickRow:function(index,row){
-			console.log(row);
+			//console.log(row);
 			EditH(index,"#singleDid",row,'#singleWind');
 		},
 		onBeforeLoad:function(){
@@ -354,14 +687,14 @@ function showDid3(row,height){
 		}
 	},
 	{
-		text:'向下合并',
+		text:'合并至下方户',
 		iconCls:'icon-down',	
 		handler: function(){
 			toMerge("#singleDid","#singleDid",1);
 		}
 	},
 	{
-		text:'向上合并',
+		text:'合并至上方户',
 		iconCls:'icon-up',	
 		handler: function(){
 			toMerge("#singleDid","#singleDid",-1);
@@ -450,7 +783,7 @@ function toFindH(datagrid,bt){
 }
 
 //执行ajax执行转移
-function ajaxToTransfer(tstybm,rows){
+function ajaxToTransfer(tstybm,rows,info,index){//info是标识符 标识是否是户幢挂接  index 代表幢信息的当前行 (户幢使用)
 	//循环rows将h的tstybm遍历后组成数组
 	var trows = new Array();
 	for (var i = 0; i < rows.length; i++) {
@@ -467,12 +800,22 @@ function ajaxToTransfer(tstybm,rows){
 			success:function(data){
 				if(data.msg>=1){
 					//刷新表格
-					$('#windDid1').datagrid('reload');
-					$('#windDid2').datagrid('reload');
-					//提醒
-					timeoutMsg("信息提醒",data.msg+"条户信息转移成功!",3000,'slide');
+					if(info=='户幢挂接')	{
+						$('#didGJ').datagrid('reload');
+						$('#did').datagrid('reload');
+						//定位
+						$('#did').datagrid('selectRow',index);
+						//提醒
+						timeoutMsg("信息提醒",data.msg+"条户信息挂接幢成功!",3000,'slide');
+					}else{
+						$('#windDid1').datagrid('reload');
+						$('#windDid2').datagrid('reload');
+						//提醒
+						timeoutMsg("信息提醒",data.msg+"条户信息转移成功!",3000,'slide');
+					}
+						
 				}else{
-					showMsg('严重错误','转移数据失败,后台程序出错,请联系开发者查错!','warning')
+					showMsg('错误提醒','操作数据失败,详情请查看错误日志!','warning')
 				}
 			},
 			error:function(data){
@@ -821,12 +1164,12 @@ function deleteZ(id){
 			},	
 			success:function(data){
 				if(data.msg>0){
-					showMsg('友情提示','该条记录存在户信息,<br/>不能直接删除,请双击行查看详情!','warning')
+					showMsg('友情提示','该幢下存在有效户信息,<br/>不能直接删除,请双击行查看户详情!','warning')
 				}else if (data.msg<0){
-					showMsg('严重错误','查询幢下户信息时程序出错,请联系管理员差错!','warning')
+					showMsg('错误提醒','查询幢下是否有户信息时出错,详情请查看错误日志!','warning')
 				}
 				else{
-					$.messager.confirm('确认对话框',"该条幢信息可以被删除,是否确定操作?", function(r) {
+					$.messager.confirm('确认对话框',"坐落为:<strong>"+rows[0].FWZL+"</strong><br/>的该条幢信息可以被删除,是否确定该操作?", function(r) {
 			              if (r){
 			            	  ajaxToDelZ(rows[0].TSTYBM,id);
 			           	   }
@@ -851,7 +1194,7 @@ function ajaxToDelZ(tstybm,id){
 		},
 		success:function(data){
 			if(data.msg<=0){
-				showMsg('严重错误','删除幢信息时后台程序出错,请联系管理员差错!','warning')
+				showMsg('严重错误','删除幢信息时后台程序出错,详情请查看日志!','warning')
 			}else {
 				//刷新表格
 				$(id).datagrid('reload');
@@ -950,7 +1293,5 @@ function openDialog(url,windowID,datagridId){
 	        }
 		 });
 }
-
-/*})*///我是jquery的下括号补全
 
 

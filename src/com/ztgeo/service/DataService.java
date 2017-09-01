@@ -1,14 +1,14 @@
 package com.ztgeo.service;
 
 public interface DataService {
-	//根据关键字拼接sql语句 并查询结果
-	public Object getDataByKeyWord(String keyword, String page, String rows);
-	
+
 	//关键字的分页查询
-	public String getDataByKeyWordAndPage(String page, String rows, String sort, String order, String keyword);
+	public String getDataByKeyWordAndPage(String page, String rows, String sort, String order, String keyword, String category);
 	
 	//有条件拼接的查询 预设prep
 	public String getDataByParams(String page, String rows, String sort, String order, String tstybm, String keyword);
+	
+
 	
 	//转移 
 	public String toTransfer(String tstybm, String[] trows);
@@ -35,5 +35,8 @@ public interface DataService {
 	public String delZ(String tstybm);
 	//分割户
 	public String splitH(String btstybm, String bbdcdyh);
+
+	//幢的合并 	
+	public String toMergeZ(String tTstybm, String bTstybm);
 	
 }

@@ -27,98 +27,124 @@ public class Serviceimpl implements DataService {
 	@Resource(name = "dao")
 	private Dao dao;
 	
-	public String getDataByKeyWord(String keyword,String page, String rows){
-		String sql = "select * from fc_z_qsdc z where z.fwzl like '%"+keyword+"%' order by zz asc";
-		System.out.println(sql);
-		//string转int
-		int pageInt = Page.parseInt(page);
-		int rowsInt = Page.parseInt(rows);
-
-		//拿到全部数据
-		JSONArray jsonarray = Tojson.resultToJsonArray(dao.getData(sql));
-		//进行过滤数据
-		JSONArray newArray = Tojson.getJsonForPage(jsonarray, Page.getStar(pageInt, rowsInt)-1,Page.getEnd(pageInt, rowsInt)-1);
-		
-		return Tojson.getJsonData(newArray,jsonarray.size()) ;
-	}
-
+	@Resource(name="tojson")
+	private Tojson tojson;
 	
-	
+
 	@Override
 	public String getDataByParams(String page, String rows, String sort, String order, String tstybm,String keyword) {
-		String[] params = new String[3];
+		String[] params = new String[2];
 		String baseSql ="";
 		//计算起始条和结束条
 		int star =Page.getStar(Page.parseInt(page), Page.parseInt(rows));
 		int end = Page.getEnd(Page.parseInt(page), Page.parseInt(rows));
 		//对参数判断 整理成数组传入底层 对是否有sort排序做判断
 		String sqlCount = "";
-	if(keyword.length()==0){//无关键字
-		sqlCount = "select count(1) from fc_h_qsdc h where h.lsztybm = '"+tstybm+"'";
-		if(sort==null||sort.length()==0){
-			//无值 赋初始值
-			 baseSql = "select * from (select a1.*, rownum rn  from (select * from fc_h_qsdc h  where h.lsztybm = ? order by zl asc) a1 where rownum <= ?) where rn >= ?";
+		if(tstybm!=null&&tstybm.length()>0){//有图属统一编码的查询
+			if(keyword.length()==0){//无关键字
+				sqlCount = "select count(1) from fc_h_qsdc h where h.lsztybm = '"+tstybm+"'";
+				if(sort==null||sort.length()==0){
+					//无值 初始值
+					 baseSql = "select * from (select a1.*, rownum rn  from (select * from fc_h_qsdc h  where h.lsztybm = '"+tstybm+"' order by zl asc) a1 where rownum <= ?) where rn >= ?";
+					
+				}else{ 
+					 baseSql = "select * from (select a1.*, rownum rn  from (select * from fc_h_qsdc h  where h.lsztybm = '"+tstybm+"' order by "+sort+" "+order+") a1 where rownum <= ?) where rn >= ?";
+					
+				}
+			}else{//有关键字
+				//查看是否有tstybm
+				sqlCount = "select count(1) from fc_h_qsdc h where h.lsztybm = '"+tstybm+"' and h.zl like '%"+keyword+"%'";
+				if(sort==null||sort.length()==0){
+					//无值 赋初始值
+					 baseSql = "select * from (select a1.*, rownum rn  from (select * from fc_h_qsdc h  where h.lsztybm = '"+tstybm+"' and h.zl like '%"+keyword+"%' order by zl asc) a1 where rownum <= ?) where rn >= ?";
+					
+				}else{ 
+					 baseSql = "select * from (select a1.*, rownum rn  from (select * from fc_h_qsdc h  where h.lsztybm = '"+tstybm+"' and h.zl like '%"+keyword+"%' order by "+sort+" "+order+") a1 where rownum <= ?) where rn >= ?";
+					
+				}
+				
+			}	
 			
-		}else{ 
-			 baseSql = "select * from (select a1.*, rownum rn  from (select * from fc_h_qsdc h  where h.lsztybm = ? order by "+sort+" "+order+") a1 where rownum <= ?) where rn >= ?";
+		}else{//无图属统一编码  根据 关键字进行查询  
+			sqlCount = "select count(1) from fc_h_qsdc h where  h.zl like '%"+keyword+"%'";
+			if(sort==null||sort.length()==0){
+				//无值 赋初始值
+				 baseSql = "select * from (select a1.*, rownum rn  from (select * from fc_h_qsdc h  where  h.zl like '%"+keyword+"%' order by zl asc) a1 where rownum <= ?) where rn >= ?";
+				
+			}else{ 
+				 baseSql = "select * from (select a1.*, rownum rn  from (select * from fc_h_qsdc h  where  h.zl like '%"+keyword+"%' order by "+sort+" "+order+") a1 where rownum <= ?) where rn >= ?";
+				
+			}
 			
 		}
-	}else{//有关键字
-		sqlCount = "select count(1) from fc_h_qsdc h where h.lsztybm = '"+tstybm+"' and h.zl like '%"+keyword+"%'";
-		if(sort==null||sort.length()==0){
-			//无值 赋初始值
-			 baseSql = "select * from (select a1.*, rownum rn  from (select * from fc_h_qsdc h  where h.lsztybm = ? and h.zl like '%"+keyword+"%' order by zl asc) a1 where rownum <= ?) where rn >= ?";
-			
-		}else{ 
-			 baseSql = "select * from (select a1.*, rownum rn  from (select * from fc_h_qsdc h  where h.lsztybm = ? and h.zl like '%"+keyword+"%' order by "+sort+" "+order+") a1 where rownum <= ?) where rn >= ?";
-			
-		}
 		
-	}	
 		
-		 params[0]=tstybm;
-		 params[1]=String.valueOf(end);
-		 params[2]=String.valueOf(star);
 		
-		//base sql
+		 params[0]=String.valueOf(end);
+		 params[1]=String.valueOf(star);
 		
 		//获得总数
 				int	total = 0;
-				
 				total = dao.getCount(sqlCount);
 				System.out.println("函数:"+sqlCount+"拿到的条数信息:"+total);
-				ResultSet set =dao.getDataByParams(baseSql, params);
 		//传入底层  获得数据
-		JSONArray jsonarray = Tojson.resultToJsonArray(set);
-		
-		
-		return Tojson.getJsonData(jsonarray, total);
+		JSONArray jsonarray = tojson.resultToJsonArray(dao.getDataByParams(baseSql, params));
+		                 
+		//释放资源 
+		params=null;
+		sqlCount=null;
+		baseSql=null;
+		dao.closeRecource();
+		dao.closeConn();
+		return tojson.getJsonData(jsonarray, total);
 		
 	}
 
 
 
 	@Override
-	public String getDataByKeyWordAndPage(String page, String rows, String sort, String order, String keyword) {
+	public String getDataByKeyWordAndPage(String page, String rows, String sort, String order, String keyword,String category) {
 		String[] params = new String[2];
+		//判断category类别
+		String categoryStr ="fwzl";
+		if(category!=null&&!"".equals(category)){
+			if("f1".equals(category)){//按照坐落搜索
+				categoryStr="fwzl";
+			}else if("f2".equals(category)){//按照图属统一编码
+				categoryStr="tstybm";
+			}else{//按照宗地统一编码
+				categoryStr="zdtybm";
+			}
+		}
+		//sql语句
 		String baseSql ="";
 		int star =Page.getStar(Page.parseInt(page), Page.parseInt(rows));
 		int end = Page.getEnd(Page.parseInt(page), Page.parseInt(rows));
+		//无排序规则  则 默认排序
 		if(sort==null||sort.length()==0){
 			//无值 赋初始值
-			 baseSql = "select * from (select a1.*, rownum rn  from (select * from fc_z_qsdc z where z.fwzl like '%"+keyword+"%' order by zh asc) a1 where rownum <= ?) where rn >= ?";
+			 baseSql = "select * from (select a1.*, rownum rn  from (select z.*,nvl(h.hh,0) hcount from fc_z_qsdc z left join ( select count(1) hh,lsztybm from fc_h_qsdc group by lsztybm) h on z.tstybm = h.lsztybm where "+categoryStr+" like '%"+keyword+"%' order by fwzl asc) a1 where rownum <= ?) where rn >= ?";
 			
 		}else{
-			 baseSql = "select * from (select a1.*, rownum rn  from (select * from fc_z_qsdc z where z.fwzl like '%"+keyword+"%' order by "+sort+" "+order+") a1 where rownum <= ?) where rn >= ?";
+			 baseSql = "select * from (select a1.*, rownum rn  from (select z.*,nvl(h.hh,0) hcount from fc_z_qsdc z left join ( select count(1) hh,lsztybm from fc_h_qsdc group by lsztybm) h on z.tstybm = h.lsztybm where "+categoryStr+" like '%"+keyword+"%' order by "+sort+" "+order+") a1 where rownum <= ?) where rn >= ?";
 			
 		}
+		System.out.println("执行的查询语句:"+baseSql);
 		params[0]=String.valueOf(end);
 		params[1]=String.valueOf(star);
-		JSONArray jsonarray = Tojson.resultToJsonArray(dao.getDataByParams(baseSql, params));
+		JSONArray jsonarray = tojson.resultToJsonArray(dao.getDataByParams(baseSql, params));
 		int	total = 0;
-		String sqlCount = "select count(1) from fc_z_qsdc z where z.fwzl like '%"+keyword+"%'";
+		String sqlCount = "select count(1) from fc_z_qsdc z where "+categoryStr+" like '%"+keyword+"%'";
+		//满足条件的总条数
 		total = dao.getCount(sqlCount);
-		return Tojson.getJsonData(jsonarray, total);
+		//资源释放  
+		baseSql=null;
+		params=null;
+		categoryStr=null;
+		//关闭数据库连接  
+		dao.closeRecource();
+		dao.closeConn();
+		return tojson.getJsonData(jsonarray, total);
 	}
 
 
@@ -140,7 +166,7 @@ public class Serviceimpl implements DataService {
 		System.out.println("转移户的sql语句:"+sql);
 		int resultCount = dao.doExecuteUpdate(sql,new String[0]);
 		//将影响的条数放入json封装对象进行加工成json
-		return Tojson.msgTojson(resultCount);
+		return tojson.msgTojson(resultCount);
 	}
 
 	@Override
@@ -151,7 +177,7 @@ public class Serviceimpl implements DataService {
 		String sql = "select gl.slbh from dj_tsgl gl left join fc_h_qsdc h  on h.tstybm = gl.tstybm where h.tstybm = ?";
 		ResultSet set =dao.getDataByParams(sql, params);
 		//将结果集放入json判断处理
-		List<String> slbhs = Tojson.isHaveBusiness(set);
+		List<String> slbhs = tojson.isHaveBusiness(set);
 		//循环进行编译slbhs拼接字符串
 		StringBuffer sb = new StringBuffer();
 		//判断如果>0 则有权属信息 进行权属的再次查询
@@ -165,11 +191,11 @@ public class Serviceimpl implements DataService {
 			}
 			System.out.println("---拼接的sql条件:"+sb);
 		String busInfoSql = 
-				"select zx.djlx,\n" +
+				"select nvl(zx.djlx,'相关登记注销') djlx,\n" +
 						"       zx.slbh,\n" + 
 						"       zx.xgzh bdczh,\n" + 
 						"       zx.bdcdyh,\n" + 
-						"       wmsys.wm_concat(to_char(qlr.qlrmc)) qlr\n" + 
+						"       wmsys.wm_concat(distinct to_char(qlr.qlrmc)) qlr\n" + 
 						"  from dj_xgdjzx zx\n" + 
 						"  left join dj_qlrgl qlrgl\n" + 
 						"    on qlrgl.slbh = zx.slbh\n" + 
@@ -178,11 +204,11 @@ public class Serviceimpl implements DataService {
 						" where zx.slbh in ( "+sb+" )\n" + 
 						" group by zx.djlx, zx.slbh, zx.xgzh, zx.bdcdyh\n" + 
 						"union\n" + 
-						"select dy.dylx,\n" + 
+						"select nvl(dy.dylx,'抵押登记') dylx,\n" + 
 						"       dy.slbh,\n" + 
 						"       dy.bdczmh bdczh,\n" + 
 						"       dy.bdcdyh,\n" + 
-						"       wmsys.wm_concat(to_char(qlr.qlrmc)) qlr\n" + 
+						"       wmsys.wm_concat(distinct to_char(qlr.qlrmc)) qlr\n" + 
 						"  from dj_dy dy\n" + 
 						"  left join dj_qlrgl qlrgl\n" + 
 						"    on qlrgl.slbh = dy.slbh\n" + 
@@ -191,24 +217,24 @@ public class Serviceimpl implements DataService {
 						" where dy.slbh in ( "+sb+" )\n" + 
 						" group by dy.dylx, dy.slbh, dy.bdczmh, dy.bdcdyh\n" + 
 						"union\n" + 
-						"select yy.yysx djlx,\n" + 
+						"select  yy.yysx djlx,\n" + 
 						"       yy.slbh,\n" + 
-						"       yy.bdczmh bdczh,\n" + 
+						"       yy.xgzh bdczh,\n" + 
 						"       yy.bdcdyh,\n" + 
-						"       wmsys.wm_concat(to_char(qlr.qlrmc))\n" + 
+						"       wmsys.wm_concat(distinct to_char(qlr.qlrmc))\n" + 
 						"  from dj_yy yy\n" + 
 						"  left join dj_qlrgl qlrgl\n" + 
 						"    on qlrgl.slbh = yy.slbh\n" + 
 						"  left join dj_qlr qlr\n" + 
 						"    on qlr.qlrid = qlrgl.qlrid\n" + 
 						" where yy.slbh in ( "+sb+" )\n" + 
-						" group by yy.yysx, yy.slbh, yy.bdczmh, yy.bdcdyh\n" + 
+						" group by yy.yysx, yy.slbh, yy.xgzh, yy.bdcdyh\n" + 
 						"union\n" + 
-						"select djb.djlx,\n" + 
+						"select nvl(djb.djlx,'权属登记') djlx,\n" + 
 						"       djb.slbh slbh,\n" + 
 						"       djb.bdczh bdczh,\n" + 
 						"       djb.bdcdyh bdcdyh,\n" + 
-						"       wmsys.wm_concat(to_char(qlr.qlrmc)) qlr\n" + 
+						"       wmsys.wm_concat(distinct to_char(qlr.qlrmc)) qlr\n" + 
 						"  from dj_djb djb\n" + 
 						"  left join dj_qlrgl qlrgl\n" + 
 						"    on qlrgl.slbh = djb.slbh\n" + 
@@ -217,24 +243,39 @@ public class Serviceimpl implements DataService {
 						" where djb.slbh in ( "+sb+" )\n" + 
 						" group by djb.djlx, djb.slbh, djb.bdczh, djb.bdcdyh\n" + 
 						"union\n" + 
-						"select cf.cflx djlx,\n" + 
+						"select nvl(cf.cflx,'查封登记') djlx,\n" + 
 						"       cf.slbh,\n" + 
 						"       cf.xgzh bdczh,\n" + 
 						"       cf.bdcdyh,\n" + 
-						"       wmsys.wm_concat(to_char(qlr.qlrmc)) qlr\n" + 
+						"       wmsys.wm_concat(distinct to_char(qlr.qlrmc)) qlr\n" + 
 						"  from dj_cf cf\n" + 
 						"  left join dj_qlrgl qlrgl\n" + 
 						"    on qlrgl.slbh = cf.slbh\n" + 
 						"  left join dj_qlr qlr\n" + 
 						"    on qlr.qlrid = qlrgl.qlrid\n" + 
 						" where cf.slbh in ( "+sb+" )\n" + 
-						" group by cf.cflx, cf.slbh, cf.xgzh, cf.bdcdyh";
+						" group by cf.cflx, cf.slbh, cf.xgzh, cf.bdcdyh\n" +
+						"union\n" + 
+						" select\n" +
+						"  nvl(yg.djlx,'预告') djlx,\n" + 
+						"  yg.slbh,\n" + 
+						"  yg.bdczmh bdczh,\n" + 
+						"  yg.bdcdyh,\n" + 
+						"  wmsys.wm_concat(distinct to_char(qlr.qlrmc)) qlr\n" + 
+						"from  dj_yg yg\n" + 
+						"left join dj_qlrgl qlrgl\n" + 
+						"on qlrgl.slbh =yg.slbh\n" + 
+						"left join dj_qlr qlr\n" + 
+						"on qlrgl.qlrid= qlr.qlrid\n" + 
+						"where yg.slbh in ( "+sb+" )\n" + 
+						" group by yg.djlx, yg.slbh, yg.bdczmh, yg.bdcdyh";
+
 		System.out.println("---联合查询相关业务的sql语句:"+busInfoSql);
 		set =dao.getData(busInfoSql);
 		//结果集进行处理
-		jsonarray = Tojson.resultToJsonArray(set);
+		jsonarray = tojson.resultToJsonArray(set);
 		}
-		return  Tojson.getJsonData(jsonarray,slbhs.size()) ;
+		return  tojson.getJsonData(jsonarray,slbhs.size()) ;
 	}
 
 
@@ -245,7 +286,7 @@ public class Serviceimpl implements DataService {
 		params[0] = tstybm;
 		String sql = "delete from fc_h_qsdc where tstybm =?";
 		int resultCount = dao.doExecuteUpdate(sql, params);
-		return Tojson.msgTojson(resultCount);
+		return tojson.msgTojson(resultCount);
 	}
 
 
@@ -257,12 +298,12 @@ public class Serviceimpl implements DataService {
 		params[0] = tstybm;
 		String sql = "select h.bdcdyh,ts.bdcdyh from fc_h_qsdc h ,dj_tsgl ts where h.tstybm =? and h.tstybm = ts.tstybm";
 		ResultSet set =dao.getDataByParams(sql, params);
-		List<String> bdcdyhs = Tojson.isCanMerge(set);
+		List<String> bdcdyhs = tojson.isCanMerge(set);
 		if(bdcdyhs.size()>0){
 			sql = "select gl.slbh from dj_tsgl gl left join fc_h_qsdc h  on h.tstybm = gl.tstybm where h.tstybm = ?";
 			set =dao.getDataByParams(sql, params);
 			//将结果集放入json判断处理
-			List<String> slbhs = Tojson.isHaveBusiness(set);
+			List<String> slbhs = tojson.isHaveBusiness(set);
 			//循环进行编译slbhs拼接字符串
 			StringBuffer sb = new StringBuffer();
 			//判断如果>0 则有权属信息 进行权属的再次查询
@@ -275,78 +316,92 @@ public class Serviceimpl implements DataService {
 					}
 				}
 				System.out.println("---拼接的sql条件:"+sb);
-			String busInfoSql = 
-					"select zx.djlx,\n" +
-							"       zx.slbh,\n" + 
-							"       zx.xgzh bdczh,\n" + 
-							"       zx.bdcdyh,\n" + 
-							"       wmsys.wm_concat(to_char(qlr.qlrmc)) qlr\n" + 
-							"  from dj_xgdjzx zx\n" + 
-							"  left join dj_qlrgl qlrgl\n" + 
-							"    on qlrgl.slbh = zx.slbh\n" + 
-							"  left join dj_qlr qlr\n" + 
-							"    on qlr.qlrid = qlrgl.qlrid\n" + 
-							" where zx.slbh in ( "+sb+" )\n" + 
-							" group by zx.djlx, zx.slbh, zx.xgzh, zx.bdcdyh\n" + 
-							"union\n" + 
-							"select dy.dylx,\n" + 
-							"       dy.slbh,\n" + 
-							"       dy.bdczmh bdczh,\n" + 
-							"       dy.bdcdyh,\n" + 
-							"       wmsys.wm_concat(to_char(qlr.qlrmc)) qlr\n" + 
-							"  from dj_dy dy\n" + 
-							"  left join dj_qlrgl qlrgl\n" + 
-							"    on qlrgl.slbh = dy.slbh\n" + 
-							"  left join dj_qlr qlr\n" + 
-							"    on qlr.qlrid = qlrgl.qlrid\n" + 
-							" where dy.slbh in ( "+sb+" )\n" + 
-							" group by dy.dylx, dy.slbh, dy.bdczmh, dy.bdcdyh\n" + 
-							"union\n" + 
-							"select yy.yysx djlx,\n" + 
-							"       yy.slbh,\n" + 
-							"       yy.bdczmh bdczh,\n" + 
-							"       yy.bdcdyh,\n" + 
-							"       wmsys.wm_concat(to_char(qlr.qlrmc))\n" + 
-							"  from dj_yy yy\n" + 
-							"  left join dj_qlrgl qlrgl\n" + 
-							"    on qlrgl.slbh = yy.slbh\n" + 
-							"  left join dj_qlr qlr\n" + 
-							"    on qlr.qlrid = qlrgl.qlrid\n" + 
-							" where yy.slbh in ( "+sb+" )\n" + 
-							" group by yy.yysx, yy.slbh, yy.bdczmh, yy.bdcdyh\n" + 
-							"union\n" + 
-							"select djb.djlx,\n" + 
-							"       djb.slbh slbh,\n" + 
-							"       djb.bdczh bdczh,\n" + 
-							"       djb.bdcdyh bdcdyh,\n" + 
-							"       wmsys.wm_concat(to_char(qlr.qlrmc)) qlr\n" + 
-							"  from dj_djb djb\n" + 
-							"  left join dj_qlrgl qlrgl\n" + 
-							"    on qlrgl.slbh = djb.slbh\n" + 
-							"  left join dj_qlr qlr\n" + 
-							"    on qlr.qlrid = qlrgl.qlrid\n" + 
-							" where djb.slbh in ( "+sb+" )\n" + 
-							" group by djb.djlx, djb.slbh, djb.bdczh, djb.bdcdyh\n" + 
-							"union\n" + 
-							"select cf.cflx djlx,\n" + 
-							"       cf.slbh,\n" + 
-							"       cf.xgzh bdczh,\n" + 
-							"       cf.bdcdyh,\n" + 
-							"       wmsys.wm_concat(to_char(qlr.qlrmc)) qlr\n" + 
-							"  from dj_cf cf\n" + 
-							"  left join dj_qlrgl qlrgl\n" + 
-							"    on qlrgl.slbh = cf.slbh\n" + 
-							"  left join dj_qlr qlr\n" + 
-							"    on qlr.qlrid = qlrgl.qlrid\n" + 
-							" where cf.slbh in ( "+sb+" )\n" + 
-							" group by cf.cflx, cf.slbh, cf.xgzh, cf.bdcdyh";
+				String busInfoSql = 
+						"select nvl(zx.djlx,'相关登记注销') djlx,\n" +
+								"       zx.slbh,\n" + 
+								"       zx.xgzh bdczh,\n" + 
+								"       zx.bdcdyh,\n" + 
+								"       wmsys.wm_concat(distinct to_char(qlr.qlrmc)) qlr\n" + 
+								"  from dj_xgdjzx zx\n" + 
+								"  left join dj_qlrgl qlrgl\n" + 
+								"    on qlrgl.slbh = zx.slbh\n" + 
+								"  left join dj_qlr qlr\n" + 
+								"    on qlr.qlrid = qlrgl.qlrid\n" + 
+								" where zx.slbh in ( "+sb+" )\n" + 
+								" group by zx.djlx, zx.slbh, zx.xgzh, zx.bdcdyh\n" + 
+								"union\n" + 
+								"select nvl(dy.dylx,'抵押登记') dylx,\n" + 
+								"       dy.slbh,\n" + 
+								"       dy.bdczmh bdczh,\n" + 
+								"       dy.bdcdyh,\n" + 
+								"       wmsys.wm_concat(distinct to_char(qlr.qlrmc)) qlr\n" + 
+								"  from dj_dy dy\n" + 
+								"  left join dj_qlrgl qlrgl\n" + 
+								"    on qlrgl.slbh = dy.slbh\n" + 
+								"  left join dj_qlr qlr\n" + 
+								"    on qlr.qlrid = qlrgl.qlrid\n" + 
+								" where dy.slbh in ( "+sb+" )\n" + 
+								" group by dy.dylx, dy.slbh, dy.bdczmh, dy.bdcdyh\n" + 
+								"union\n" + 
+								"select  yy.yysx djlx,\n" + 
+								"       yy.slbh,\n" + 
+								"       yy.xgzh bdczh,\n" + 
+								"       yy.bdcdyh,\n" + 
+								"       wmsys.wm_concat(distinct to_char(qlr.qlrmc))\n" + 
+								"  from dj_yy yy\n" + 
+								"  left join dj_qlrgl qlrgl\n" + 
+								"    on qlrgl.slbh = yy.slbh\n" + 
+								"  left join dj_qlr qlr\n" + 
+								"    on qlr.qlrid = qlrgl.qlrid\n" + 
+								" where yy.slbh in ( "+sb+" )\n" + 
+								" group by yy.yysx, yy.slbh, yy.xgzh, yy.bdcdyh\n" + 
+								"union\n" + 
+								"select nvl(djb.djlx,'权属登记') djlx,\n" + 
+								"       djb.slbh slbh,\n" + 
+								"       djb.bdczh bdczh,\n" + 
+								"       djb.bdcdyh bdcdyh,\n" + 
+								"       wmsys.wm_concat(distinct to_char(qlr.qlrmc)) qlr\n" + 
+								"  from dj_djb djb\n" + 
+								"  left join dj_qlrgl qlrgl\n" + 
+								"    on qlrgl.slbh = djb.slbh\n" + 
+								"  left join dj_qlr qlr\n" + 
+								"    on qlr.qlrid = qlrgl.qlrid\n" + 
+								" where djb.slbh in ( "+sb+" )\n" + 
+								" group by djb.djlx, djb.slbh, djb.bdczh, djb.bdcdyh\n" + 
+								"union\n" + 
+								"select nvl(cf.cflx,'查封登记') djlx,\n" + 
+								"       cf.slbh,\n" + 
+								"       cf.xgzh bdczh,\n" + 
+								"       cf.bdcdyh,\n" + 
+								"       wmsys.wm_concat(distinct to_char(qlr.qlrmc)) qlr\n" + 
+								"  from dj_cf cf\n" + 
+								"  left join dj_qlrgl qlrgl\n" + 
+								"    on qlrgl.slbh = cf.slbh\n" + 
+								"  left join dj_qlr qlr\n" + 
+								"    on qlr.qlrid = qlrgl.qlrid\n" + 
+								" where cf.slbh in ( "+sb+" )\n" + 
+								" group by cf.cflx, cf.slbh, cf.xgzh, cf.bdcdyh\n" +
+								"union\n" + 
+								" select\n" +
+								"  nvl(yg.djlx,'预告') djlx,\n" + 
+								"  yg.slbh,\n" + 
+								"  yg.bdczmh bdczh,\n" + 
+								"  yg.bdcdyh,\n" + 
+								"  wmsys.wm_concat(distinct to_char(qlr.qlrmc)) qlr\n" + 
+								"from  dj_yg yg\n" + 
+								"left join dj_qlrgl qlrgl\n" + 
+								"on qlrgl.slbh =yg.slbh\n" + 
+								"left join dj_qlr qlr\n" + 
+								"on qlrgl.qlrid= qlr.qlrid\n" + 
+								"where yg.slbh in ( "+sb+" )\n" + 
+								" group by yg.djlx, yg.slbh, yg.bdczmh, yg.bdcdyh";
 			System.out.println("---联合查询相关业务的sql语句:"+busInfoSql);
 			set =dao.getData(busInfoSql);
 			//结果集进行处理
-			jsonarray = Tojson.resultToJsonArray(set);
+			jsonarray = tojson.resultToJsonArray(set);
 			}
 		}
-		return Tojson.getJsonData(jsonarray,bdcdyhs.size()) ;
+		return tojson.getJsonData(jsonarray,bdcdyhs.size()) ;
 	}
 
 
@@ -380,7 +435,7 @@ public class Serviceimpl implements DataService {
 			//有一项执行失败则回滚
 			conn.rollback();
 			System.out.println("--执行合并有部分语句执行失败,数据已回滚");
-			return Tojson.msgTojson(-1);
+			return tojson.msgTojson(-1);
 		}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -396,7 +451,7 @@ public class Serviceimpl implements DataService {
 			Jdbc.closeResource();
 		}
 		System.out.println("---执行合并时替换了"+margeCount+"条,删除了:"+delCount+"条!");
-		return  Tojson.msgTojson(1);
+		return  tojson.msgTojson(1);
 	}
 
 
@@ -405,7 +460,11 @@ public class Serviceimpl implements DataService {
 	public String isCanDel(String tstybm) {
 		String sql = "select count(1) from fc_h_qsdc h where h.lsztybm = '"+tstybm+"'";
 		int total = dao.getCount(sql);
-		return Tojson.msgTojson(total);
+		//资源关闭
+		dao.closeRecource();
+		dao.closeConn();
+		sql=null;
+		return tojson.msgTojson(total);
 	}
 
 
@@ -416,7 +475,12 @@ public class Serviceimpl implements DataService {
 		String[] params = new String[1];
 		params[0]=tstybm;
 		int total = dao.doExecuteUpdate(sql, params);
-		return Tojson.msgTojson(total);
+		//关闭资源文件  
+		sql=null;
+		params=null;
+		dao.closeRecource();
+		dao.closeConn();
+		return tojson.msgTojson(total);
 	}
 
 
@@ -448,7 +512,7 @@ public class Serviceimpl implements DataService {
 			//有一项执行失败则回滚
 			conn.rollback();
 			System.out.println("--执行强制删除户信息有部分语句执行失败,数据已回滚");
-			return Tojson.msgTojson(-1);
+			return tojson.msgTojson(-1);
 		}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -464,7 +528,7 @@ public class Serviceimpl implements DataService {
 			Jdbc.closeResource();
 		}
 		System.out.println("强制性删除时: 删除户信息:"+delHCount+"条,删除图属信息:"+delTsCount);
-		return Tojson.msgTojson(1);
+		return tojson.msgTojson(1);
 	}
 
 
@@ -506,7 +570,7 @@ public class Serviceimpl implements DataService {
 			//有一项执行失败则回滚
 			conn.rollback();
 			System.out.println("--执行合并有部分语句执行失败,数据已回滚");
-			return Tojson.msgTojson(-1);
+			return tojson.msgTojson(-1);
 		}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -522,6 +586,49 @@ public class Serviceimpl implements DataService {
 			Jdbc.closeResource();
 		}
 		
-		return Tojson.msgTojson(1,tstybm);
+		return tojson.msgTojson(1,tstybm);
+	}
+
+
+
+	@Override
+	public String toMergeZ(String tTstybm, String bTstybm) {
+		String baseSql1 = "update fc_h_qsdc t set t.lsztybm ='"+tTstybm+"' where t.lsztybm = '"+bTstybm+"'";
+		String baseSql2 = "delete from fc_z_qsdc t where t.tstybm ='"+bTstybm+"'";
+		
+		//采用手动提交  
+		Connection conn = dao.getConn();
+		try {
+			conn.setAutoCommit(false);
+			//执行替换tstybm的工作
+			int insertCount1 = dao.doExecuteUpdateNotAuto(baseSql1);
+			//执行删除户的操作
+			int insertCount2 = dao.doExecuteUpdateNotAuto(baseSql2);
+			
+		if((insertCount1!=-1)&&(insertCount2!=-1&&insertCount2!=0)){
+			//全部执行则提交
+			conn.commit();
+		}else{
+			//有一项执行失败则回滚
+			conn.rollback();
+			System.out.println("--执行合并有部分语句执行失败,数据已回滚");
+			return tojson.msgTojson(-1);
+		}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			//重设提交方式
+			try {
+				conn.setAutoCommit(true);
+			} catch (SQLException e) {
+				System.out.println("---重设提交方式为自动提交失败");
+				e.printStackTrace();
+			}
+			baseSql1=null;
+			baseSql2=null;
+			dao.closeConn();
+			dao.closeRecource();
+		}
+		return tojson.msgTojson(1);
 	}
 }

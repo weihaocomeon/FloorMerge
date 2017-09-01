@@ -2,6 +2,7 @@ package com.ztgeo.dao.impl;
 
 import static org.junit.Assert.*;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 
 import javax.annotation.Resource;
@@ -53,6 +54,27 @@ public class DaoImpl implements Dao {
 	public int doExecuteUpdateNotAuto(String sql, String[] params) {
 		return Jdbc.doExecuteUpdateNotAuto(sql, params);
 		
+	}
+
+	@Override
+	public void closeRecource() {
+		Jdbc.closeResource();
+		
+	}
+
+	@Override
+	public void closeConn() {
+		Jdbc.closeConn();
+	}
+
+	@Override
+	public Connection getConn() {
+		return Jdbc.getConn();
+	}
+
+	@Override
+	public int doExecuteUpdateNotAuto(String baseSql) {
+		return Jdbc.doExecuteUpdateNotAuto(baseSql);
 	}
 
 	

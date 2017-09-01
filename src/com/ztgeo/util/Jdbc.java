@@ -63,9 +63,6 @@ public class Jdbc {
 			System.out.println("----预编译sql语句有误");
 			e.printStackTrace();
 			return -1;
-		}finally {
-			closeConn();
-			closeResource();
 		}
 		return total;
 	}
@@ -120,6 +117,19 @@ public class Jdbc {
 				for (int i = 0; i < params.length; i++) {
 					prep.setObject(i+1, params[i]);
 				}
+				resultCount=prep.executeUpdate();
+			} catch (SQLException e) {
+				System.out.println("----预编译sql语句有误");
+				e.printStackTrace();
+				return -1;//如果return-1 说明更新失败 在上层做判断
+			}
+			return resultCount;
+		} 
+		
+		public static int doExecuteUpdateNotAuto(String baseSql){
+			//使用本方法记得获得连接 设置连接 关闭连接
+			try {
+				prep = conn.prepareStatement(baseSql);
 				resultCount=prep.executeUpdate();
 			} catch (SQLException e) {
 				System.out.println("----预编译sql语句有误");

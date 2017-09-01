@@ -22,7 +22,7 @@ import net.sf.json.JSONObject;
 @Controller
 public class Ctrl {
 	
-	private static String keyword="";
+	/*private static String keyword="";*/
 	//装配属性
 	@Resource(name="service")
 	private DataService service;
@@ -38,38 +38,39 @@ public class Ctrl {
 		return url;
 	}
 
-	//设置关键字 
+	/*//设置关键字 
 	@RequestMapping(value ="/setKeyWord")
 	@ResponseBody
 	public void setKeyWord(@RequestParam("keyword") String keyword){
 		this.keyword = keyword;
-		System.out.println("----关键字赋值成功:"+keyword);
-	}
+		System.out.println("----楼盘信息关键字:"+keyword);
+	}*/
 	
 	
-	//根据关键字 查询 真分页
+	//根据关键字 查询 包含分页
 	@RequestMapping(value ="getDataByKeywordAndPage",produces="application/json; charset=utf-8")
 	@ResponseBody
 	public Object  getDataByKeywordAndPage(@RequestParam(value="page", required=false) String page,@RequestParam(value="rows", required=false) String rows,
-			@RequestParam(value="sort", required=false) String sort,@RequestParam(value="order", required=false) String order
+			@RequestParam(value="sort", required=false) String sort,@RequestParam(value="order", required=false) String order,@RequestParam(value="keyword") String keyword,
+			@RequestParam(value="category", required=false) String category
 			){
-		System.out.println("---拿到的关键字"+keyword +"当前页和选择的条数:"+page+rows);
+		System.out.println("---关键字"+keyword +"当前页/页面容量:"+page+rows);
 		//如果关键字非空调用底层
 		if(keyword!=null&&keyword.length()!=0){
-		Object obj = service.getDataByKeyWordAndPage(page, rows, sort, order, keyword);
+		Object obj = service.getDataByKeyWordAndPage(page, rows, sort, order, keyword,category);
 		System.out.println(obj);
 		return obj;
 	}else{
-	return null;
+		return null;
 			} 
 	}
 	
-	//根据关键字 查询
+	//获得户详情  
 	@RequestMapping(value ="getHouseData",produces="application/json; charset=utf-8")
 	@ResponseBody
 	public Object getHouseData(@RequestParam(value="page", required=false) String page,@RequestParam(value="rows", required=false) String rows,
 			@RequestParam(value="sort", required=false) String sort,@RequestParam(value="order", required=false) String order,
-			@RequestParam("tstybm") String tstybm,@RequestParam("keyword") String keyword
+			@RequestParam(value="tstybm",required=false) String tstybm,@RequestParam("keyword") String keyword
 			){
 		lock.lock();
 		System.out.println(tstybm+"获得了锁");
@@ -89,6 +90,8 @@ public class Ctrl {
 		//调用转移的底层功能
 		return service.toTransfer(tstybm,trows);
 	}
+	
+	
 	
 	
 	//查询户信息是否有业务信息产生 toSelectBusiness
@@ -161,6 +164,17 @@ public class Ctrl {
 		//调用查询条数的底层功能   
 		return service.delZ(tstybm);
 	}
+	
+	//合并幢 
+	@RequestMapping(value ="toMergeZ",produces="application/json; charset=utf-8")
+	@ResponseBody
+	public String toMergeZ(@RequestParam(value="tTstybm") String tTstybm,@RequestParam(value="bTstybm") String bTstybm
+			){
+		System.out.println("合并幢信息的TSTYBM:"+tTstybm+bTstybm);
+		//调用查询条数的底层功能   
+		return service.toMergeZ(tTstybm,bTstybm);
+	}
+	
 	
 	//拆分户 拆分之前已复制性新增户 现在需要拿到被复制的tstybm 查到slbh 并赋值给新赋值的户信息上
 	@RequestMapping(value="splitH",produces="application/json;charset=utf-8")

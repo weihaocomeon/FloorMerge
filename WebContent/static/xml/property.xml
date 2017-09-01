@@ -2,19 +2,19 @@
 
 <root>
 	<!-- 主机IP地址 -->
-	<serverPath>http://localhost:8080</serverPath> 
+	<serverPath>http://10.13.0.100:8009/</serverPath> 
 	
 	<!-- 数据库连接URL -->
-	<url>jdbc:oracle:thin:@172.18.0.147:1521:bdctestsvr</url>
+	<url>jdbc:oracle:thin:@localhost:1521:orcl</url>
 	
 	<!-- 数据库连接用户名 -->
-	<username>xzbdcsxk</username>
+	<username>BDCSXK</username>
 	
 	<!-- 数据库连接密码 -->
-	<password>xzbdcsxk</password>
+	<password>BDCSXK</password>
 
-	<!-- mongoDb的连接地址 -->
-	<mongodbUrl>localhost</mongodbUrl>
+	<!-- mongoDb的连接地址  localhost-->
+	<mongodbUrl></mongodbUrl>
 	
 	<!--异常log日志的地址  -->
 	<logPath>D:/logError</logPath>

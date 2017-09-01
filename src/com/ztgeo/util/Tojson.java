@@ -8,48 +8,52 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.stereotype.Component;
+
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 //数据转换json的工具类
+@Component(value="tojson")
 public class Tojson {
-	public static JSONArray resultToJsonArray(ResultSet set){
+	public  JSONArray resultToJsonArray(ResultSet set){
 			//新建json数组
 			JSONArray jsonArray = new JSONArray();
 			
+			ResultSetMetaData mataData;
 			//新建json对象
-			JSONObject jsonObj = new JSONObject();
+			JSONObject jsonObj;
 		try {	
 			//获取列
-			ResultSetMetaData mataData = set.getMetaData();
+			 mataData = set.getMetaData();
 			
 			//获取总列数
 			int columnCount = mataData.getColumnCount();
 			while (set.next()){  
+				jsonObj = new JSONObject();
 				//遍历每一列并保存在jsonobj中
 				for (int i = 1; i <= columnCount; i++) {
-					String columnName = mataData.getColumnLabel(i);
-					String columnValue = set.getString(i);
-					jsonObj.put(columnName, columnValue);
+					//columnName..columnValue
+					jsonObj.put(mataData.getColumnLabel(i), set.getString(i));
 				}
 				
 				//放入json数组
 				jsonArray.add(jsonObj);
-				
+				jsonObj=null;
 			}	
 		} catch (SQLException e) {
 				System.out.println("----结果集转换为列时报错");
 				e.printStackTrace();
 			}finally {
-				Jdbc.closeResource();
-				Jdbc.closeConn();
+				//释放资源
+				mataData=null;
 			}
 			
 			return jsonArray;
 		}
 	
 	//json分页数据过滤
-	public static JSONArray getJsonForPage(JSONArray array,int star,int end){
+	public  JSONArray getJsonForPage(JSONArray array,int star,int end){
 		JSONArray jsonArray = new JSONArray();
 		for (int i = 0; i < array.size(); i++) {
 			if(i>=star&&i<=end){
@@ -60,26 +64,29 @@ public class Tojson {
 	}
 	
 	//json格式转换器
-	public static String getJsonData(Object results, int total) {
+	public  String getJsonData(Object results, int total) {
 		Map<String, Object> reMap = new HashMap<>();
 		reMap.put("rows", results);
 		reMap.put("total", total);
 		JSONObject responseJSONObject = JSONObject.fromObject(reMap); 
+		reMap=null;
 		return responseJSONObject.toString();
 	}
 	
 	
 	//update remove or update MSG toJson
-	public static String msgTojson(int resultCount){
+	public  String msgTojson(int resultCount){
 		Map<String, Integer> reMap = new HashMap<>();
 		reMap.put("msg", resultCount);
 		JSONObject responseJSONObject = JSONObject.fromObject(reMap); 
+		//释放资源
+		reMap=null;
 		return responseJSONObject.toString();
 	}
 	
 	//对户对应的业务信息set进行筛选是否有slbh非空的状态
 
-	public static List<String> isHaveBusiness(ResultSet set) {
+	public  List<String> isHaveBusiness(ResultSet set) {
 		List<String> slbhs = new ArrayList<>();
 		try {
 			while(set.next()){
@@ -100,7 +107,7 @@ public class Tojson {
 		return slbhs;
 	}
 	//判断合并的时候是否有bdcdyh不为空的
-	public static List<String> isCanMerge(ResultSet set) {
+	public  List<String> isCanMerge(ResultSet set) {
 		List<String> bdcdyhs = new ArrayList<>();
 		try {
 			while(set.next()){
@@ -121,11 +128,12 @@ public class Tojson {
 	     return bdcdyhs;
 	}
 
-	public static String msgTojson(int resultCount, String tstybm) {
+	public  String msgTojson(int resultCount, String tstybm) {
 		Map<String, Object> reMap = new HashMap<>();
 		reMap.put("msg", resultCount);
 		reMap.put("tstybm", tstybm);
 		JSONObject responseJSONObject = JSONObject.fromObject(reMap); 
+		reMap=null;
 		return responseJSONObject.toString();
 	}
 }

@@ -32,7 +32,10 @@ public class AopForLog {
 			//将方法名和args传入日志记录进行匹配记录
 		 retVal=pjp.proceed();
 		 //返回值	
-		DoLog.doLog(funName, args,retVal); 
+		 //查看是否配置了mongoDB的地址 如果配置了 则 进行记录  否则 不进行记录  
+		if(ReadXml.mongodbUrl!=null&&!"".equals(ReadXml.mongodbUrl)){ 
+			DoLog.doLog(funName, args,retVal);
+		}
 				return  retVal;
 	}
 	

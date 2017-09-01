@@ -1,5 +1,6 @@
 package com.ztgeo.dao;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 
 public interface Dao {
@@ -17,5 +18,17 @@ public interface Dao {
 	
 	//合并 非自动提交
 	public int doExecuteUpdateNotAuto(String sql, String[] params);
-	//复制
+	
+	//关闭资源文件
+	
+	public void closeRecource();
+	
+	public void closeConn();
+	
+	
+	//获得连接
+	public Connection getConn();
+
+	public int doExecuteUpdateNotAuto(String baseSql);
+	
 }

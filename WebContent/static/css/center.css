@@ -4,3 +4,15 @@
         height: 32px;
     }
 
+/*搜索框的div*/
+.findDiv{
+	margin: 5px 30px;
+}
+
+/*搜索框的字体设置  */
+ .find{
+	font-size: 14px;
+	
+}
+
+

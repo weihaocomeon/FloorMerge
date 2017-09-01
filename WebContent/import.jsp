@@ -1,4 +1,4 @@
-<link rel="stylesheet" type="text/css" href="static/easyui/themes/material/easyui.css">
+<link rel="stylesheet" type="text/css" href="static/easyui/themes/default/easyui.css">
 	<link rel="stylesheet" type="text/css" href="static/easyui/themes/icon.css">
 	<link rel="stylesheet" href="static/artDialog/skins/blue.css">
 	<script type="text/javascript" src="static/easyui/jquery.min.js"></script>

@@ -66,10 +66,16 @@ var columH = [
          sortable :true,
      },
      {
-         field: 'TDSYQR',
-         title: '土地使用权人',
+         field: 'LSZTYBM',
+         title: '隶属幢统一编码',
          width: '13%',
          sortable :true,
+         formatter: function(value,row,index){
+        	if(value){
+        		 return '<a href="#" class="btnSend" onclick="reSend(\''+value+'\')">'+value+'</a>'; 	
+        	} 
+        		return value;
+ 			}
      },
      {
          field: 'SJC',
@@ -157,15 +163,20 @@ var columZ =[
          sortable :true,
          order:'desc',
        },
+       {
+           field: 'HCOUNT',
+           title: '幢下房屋数量',
+           width: '8%',
+         },
      {
          field: 'XMMC',
          title: '项目名称',
-         width: '20%',
+         width: '15%',
       },
       {
           field: 'SCJZMJ',
           title: '实测建筑面积',
-          width: '20%'
+          width: '8%'
        },
 
 ];
