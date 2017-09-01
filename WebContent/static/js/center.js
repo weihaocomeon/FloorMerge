@@ -248,6 +248,8 @@ function showHZGJ(){
 						        	reSend(row.LSZTYBM);  delHinfo
 						        }else if(item.text=='删除'){
 						        	delHinfo('#didGJ');
+						        }else if(item.text=='查看业务信息'){
+						        	showHDJInfo('#didGJ');
 						        }  
 						    }    
 						});	
@@ -836,6 +838,54 @@ function timeoutMsg(title,msg,timeout,showType){
 	
 }
 
+function showHDJInfo(id){//当前的表格ID
+	//查看现在多少户被选中  满足条件的是1条或者2条
+	var rows = getAllselect(id);
+	if(rows.length==0){
+		showMsg('友情提示','未选择有效行','warning')
+	}else if (rows.length>2){
+		showMsg('友情提示','查看业务信息最大允许两条,请取消后重新选择!','warning')
+	}
+	else{
+		var data1;
+		var data2;
+		//一条请求一遍ajax
+		if(rows.length==1){
+		data1 = HDJInfo(rows[0].TSTYBM);
+		//传入底层
+		showQLinfo('40%','#busDid',data1,'100%',rows[0].ZL);
+		}else{//两条 请求两遍ajax
+			data1 = HDJInfo(rows[0].TSTYBM);
+			data2 = HDJInfo(rows[1].TSTYBM);
+			showQLinfo('80%','#busDid',data1,'50%',rows[0].ZL,'#busDid2',data2,'50%',rows[1].ZL);
+		}
+		
+		
+	}
+	
+}
+function HDJInfo(tstybm){
+	var dataR;
+	$.ajax({
+		async: false,  
+		url:'toSelectBusiness',
+		dataType:'json',
+		beforeSend: showLoad(),
+		data:{
+			tstybm:tstybm
+		},
+		success:function(data){
+			hideLoad();
+			dataR = data.rows;
+			
+		},
+		error:function(data){
+			alert('失败');
+		}
+	}) 
+	return dataR;
+}
+
 function delHinfo(id){
 	//通过id查询被选择行 限制 不可以多行删除
 	var rows = getAllselect(id);
@@ -855,7 +905,7 @@ function delHinfo(id){
 			success:function(data){
 				hideLoad();
 				if(data.total>0){
-					showQl(data,rows[0].TSTYBM,id);
+					showQL(data,rows[0].TSTYBM,id);
 				}else{
 					 $.messager.confirm('确认对话框',"该条户信息将要被删除,是否确定?", function(r) {
 			              if (r){
@@ -881,7 +931,7 @@ function showQl(data,tstybm,id){
 	    width: "80%",    
 	    height: "30%",
 	    minimizable:true,
-	    maximizable:false,
+	    maximizable:true,
 	    resizable:true,
 	    resizable:true,
 	    closed: false,  
@@ -906,12 +956,55 @@ function showQl(data,tstybm,id){
 	//显示数据表格
 	$("#busDid").datagrid({
 		rownumbers:true,
-		fit:true ,
+		fit:false ,
 		striped:true,
 		columns:[columQ],
 		data:data.rows,
 		busDid:true,
-	})
+	});
+	
+}
+
+//对于查询  
+//加载权属信息
+function showQLinfo(heightBig,id1,data1,height1,title1,id2,data2,height2,title2){//条件
+	//显示dialog
+	$('#busDialog').dialog({    
+	    title:'权属信息详情',  
+	    top:'10%',
+		left:'10%',
+	    width: "80%",    
+	    height: heightBig,
+	    minimizable:true,
+	    maximizable:true,
+	    resizable:true,
+	    closed: false,  
+	    constrain:false,
+	    modal:false
+
+	});    
+	//显示数据表格
+	$(id1).datagrid({
+		title: '<strong>'+title1+'</strong>权属信息详情', 
+		width:'100%',
+		height:height1,
+		rownumbers:true,
+		fit:false ,
+		striped:true,
+		columns:[columQ],
+		data:data1,
+	});
+	$(id2).datagrid({
+		title:  '<strong>'+title2+'</strong>权属信息详情', 
+		width:'100%',
+		height:height2,
+		rownumbers:true,
+		fit:false,
+		striped:true,
+		columns:[columQ],
+		data:data2,
+	});
+	
 }
 
 //合并显示权利ajaxToMerge(rowsM[0].TSTYBM,rowsToM[0].TSTYBM,rowsM[0].BDCDYH,id1,id2);

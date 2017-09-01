@@ -55,6 +55,7 @@
     
     <div id='busDialog'>
     	<table id ="busDid" style="width:90%;height:90%;display: none;"></table>
+    	<table id ="busDid2" style="width:90%;height:90%;display: none;"></table>
     </div>
     
 	
@@ -70,6 +71,7 @@
     <!-- 右键菜单 户幢挂接表 -->  
 <div id="mmGJ" class="easyui-menu" style="width:120px;">
     <div  data-options="iconCls:'icon-search'">查看</div>
+      <div  data-options="iconCls:'icon-reload'">查看业务信息</div>
     <div  data-options="iconCls:'icon-edit'">编辑</div>
     <div  data-options="iconCls:'icon-clean'">取消选择</div>
     <div  data-options="iconCls:'icon-remove'">删除</div>

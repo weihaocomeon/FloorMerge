@@ -100,7 +100,10 @@ public class Ctrl {
 	public String toSelectBusiness(@RequestParam(value="tstybm") String tstybm){
 		System.out.println("统计是否有业务拿到的幢tstybm:"+tstybm);
 		//调用查询条数的底层功能
-		return service.toSelectBusiness(tstybm);
+		lock.lock();
+		String resultStr = service.toSelectBusiness(tstybm);
+		lock.unlock();
+		return resultStr;
 	}
 	
 	//删除户信息
