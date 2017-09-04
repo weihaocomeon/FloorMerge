@@ -352,11 +352,15 @@ function showMsg(msgTitle,msg,icon){
 
 //打开某个窗口
 function showWindow(id,title){
+	//调用遮盖层 
+	showmask();
 	$(id).window({
 		module:true,
 		collapsible:true,
 		title:title,
-		
+		onClose: function(){
+			hidemask();
+		}
 	});	
 }
 
@@ -461,6 +465,34 @@ function showDid1(row,row2){
 		},
 		onBeforeLoad:function(){
 			document.getElementById('toFind1').value=keywords1;
+	},
+	onRowContextMenu: function(e, index, row){ //右键 不需要显示 查看幢信息了 因为 已经在幢下进行展示了 
+		//选中该行  
+		$('#windDid1').datagrid('selectRow', index);
+		
+		 $('#mmGJ').menu('show', {
+	            left: e.pageX,
+	            top: e.pageY
+	        });
+		 e.preventDefault(); 
+		
+		 //右键菜单  
+		$('#mmGJ').menu({    
+			    onClick:function(item){
+			        if(item.text=='查看'||item.text=='编辑'){
+			        	//和查看相同
+			        	EditH(index,"#windDid1",row,'#wind');
+			        }else if(item.text=='刷新'){
+			        	reloadDatagrid('#windDid1');
+			        }else if(item.text=='取消选择'){
+			        	cleanAllCheck('#windDid1');
+			        }else if(item.text=='删除'){
+			        	delHinfo('#windDid1');
+			        }else if(item.text=='查看业务信息'){
+			        	showHDJInfo('#windDid1');
+			        }  
+			    }    
+			});	
 	},
 	toolbar: [{
 		text:'向下转移',
@@ -570,6 +602,34 @@ function showDid2(row,row1,height){
 			onBeforeLoad:function(){
 				document.getElementById('toFind2').value=keywords2;
 		},
+		onRowContextMenu: function(e, index, row){ //右键 不需要显示 查看幢信息了 因为 已经在幢下进行展示了 
+			//选中该行  
+			$('#windDid2').datagrid('selectRow', index);
+			
+			 $('#mmGJ').menu('show', {
+		            left: e.pageX,
+		            top: e.pageY
+		        });
+			 e.preventDefault(); 
+			
+			 //右键菜单  
+			$('#mmGJ').menu({    
+				    onClick:function(item){
+				        if(item.text=='查看'||item.text=='编辑'){
+				        	//和查看相同
+				        	EditH(index,"#windDid2",row,'#wind');
+				        }else if(item.text=='刷新'){
+				        	reloadDatagrid('#windDid2');
+				        }else if(item.text=='取消选择'){
+				        	cleanAllCheck('#windDid2');
+				        }else if(item.text=='删除'){
+				        	delHinfo('#windDid2');
+				        }else if(item.text=='查看业务信息'){
+				        	showHDJInfo('#windDid2');
+				        }  
+				    }    
+				});	
+		},
 		toolbar: [{
 			text:'向上转移',
 			iconCls: 'icon-upz',
@@ -677,6 +737,34 @@ function showDid3(row,height){
 		},
 		onBeforeLoad:function(){
 				document.getElementById('toFind3').value=keywords3;
+		},
+		onRowContextMenu: function(e, index, row){ //右键 不需要显示 查看幢信息了 因为 已经在幢下进行展示了 
+			//选中该行  
+			$('#singleDid').datagrid('selectRow', index);
+			
+			 $('#mmGJ').menu('show', {
+		            left: e.pageX,
+		            top: e.pageY
+		        });
+			 e.preventDefault(); 
+			
+			 //右键菜单  
+			$('#mmGJ').menu({    
+				    onClick:function(item){
+				        if(item.text=='查看'||item.text=='编辑'){
+				        	//和查看相同
+				        	EditH(index,"#singleDid",row,'#singleWind');
+				        }else if(item.text=='刷新'){
+				        	reloadDatagrid('#singleDid');
+				        }else if(item.text=='取消选择'){
+				        	cleanAllCheck('#singleDid');
+				        }else if(item.text=='删除'){
+				        	delHinfo('#singleDid');
+				        }else if(item.text=='查看业务信息'){
+				        	showHDJInfo('#singleDid');
+				        }  
+				    }    
+				});	
 		},
 			
 	toolbar: [
@@ -905,7 +993,7 @@ function delHinfo(id){
 			success:function(data){
 				hideLoad();
 				if(data.total>0){
-					showQL(data,rows[0].TSTYBM,id);
+					showQl(data,rows[0].TSTYBM,id);
 				}else{
 					 $.messager.confirm('确认对话框',"该条户信息将要被删除,是否确定?", function(r) {
 			              if (r){
@@ -1387,4 +1475,13 @@ function openDialog(url,windowID,datagridId){
 		 });
 }
 
+//遮罩层
+function showmask(){
+    //遮罩层,利用datagrid的遮罩层
+    $("<div class=\"datagrid-mask\"></div>").css({display:"block",width:"100%",height:$(window).height()}).appendTo("body"); 
 
+}
+//取消遮罩层  
+function hidemask(){
+    $(".datagrid-mask").hide();
+}

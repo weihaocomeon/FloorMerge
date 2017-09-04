@@ -7,6 +7,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.*;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,15 +39,7 @@ public class Ctrl {
 		return url;
 	}
 
-	/*//设置关键字 
-	@RequestMapping(value ="/setKeyWord")
-	@ResponseBody
-	public void setKeyWord(@RequestParam("keyword") String keyword){
-		this.keyword = keyword;
-		System.out.println("----楼盘信息关键字:"+keyword);
-	}*/
-	
-	
+
 	//根据关键字 查询 包含分页
 	@RequestMapping(value ="getDataByKeywordAndPage",produces="application/json; charset=utf-8")
 	@ResponseBody
@@ -63,6 +56,20 @@ public class Ctrl {
 	}else{
 		return null;
 			} 
+	}
+	
+	
+	//根据关键字 查询 包含分页
+	@RequestMapping("saveSession")
+	public String saveSession(@RequestParam(value="user", required=false) String user,HttpSession session){
+		//如果关键字非空调用底层
+		System.out.println("未被拦截!!"+user);
+		if(user!=null&&!"".equals(user)){
+			session.setAttribute("user", user);
+			return "redirect:/index.jsp";
+		}else{
+		return "redirect:/sessionInfo.jsp";
+		}
 	}
 	
 	//获得户详情  
