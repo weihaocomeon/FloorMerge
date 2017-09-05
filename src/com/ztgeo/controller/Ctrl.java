@@ -7,6 +7,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.*;
@@ -61,15 +62,24 @@ public class Ctrl {
 	
 	//根据关键字 查询 包含分页
 	@RequestMapping("saveSession")
-	public String saveSession(@RequestParam(value="user", required=false) String user,HttpSession session){
-		//如果关键字非空调用底层
-		System.out.println("未被拦截!!"+user);
-		if(user!=null&&!"".equals(user)){
-			session.setAttribute("user", user);
-			return "redirect:/index.jsp";
+	public String saveSession(@RequestParam(value="user", required=false) String user,HttpServletRequest req,HttpSession session){
+		//查看来源  
+		String url = req.getHeader("Referer");
+		System.out.println("url的父级目录:"+url);
+		if("http://localhost:8080/FloorMerge/".equals(url)){//这边写入 补录程序的url
+			//如果关键字非空调用底层
+			System.out.println("进入到的session验证,携带的user属性是:"+user);
+			if(user!=null&&!"".equals(user)){
+				session.setAttribute("user", user);
+				return "redirect:/";
+			}else{
+			return "sessionInfo";
+			}
+		
 		}else{
-		return "redirect:/sessionInfo.jsp";
+			return "redirect:/arr.jsp";
 		}
+		
 	}
 	
 	//获得户详情  

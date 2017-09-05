@@ -10,7 +10,9 @@
 </head>
 <body>
 <script type="text/javascript" src="static/js/index.js"></script>
+<script type="text/javascript">
 
+</script>
 	<body id="cc" class="easyui-layout">   
   <!--   <div data-options="region:'north',href:'restourl?url=top'" style="height:120px" ></div>    -->
     <div data-options="region:'center',href:'restourl?url=center'" style="height:100%; width:100%"></div>   

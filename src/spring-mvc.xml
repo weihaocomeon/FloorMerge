@@ -43,7 +43,7 @@
 			<mvc:interceptor>
 				<mvc:mapping path="/**" />
 				 <mvc:exclude-mapping path="/static/**" /><!--静态资源不拦截进入login拦截器  -->
-				 <mvc:exclude-mapping path="/saveSession" />
+				  <mvc:exclude-mapping path="/saveSession" /> 
 				<bean class="com.ztgeo.intercetpor.LoginInterceptor"/>
 			</mvc:interceptor>
 		</mvc:interceptors> 

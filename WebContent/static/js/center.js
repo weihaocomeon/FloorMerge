@@ -86,8 +86,8 @@ $("#did").datagrid({
         return true;  
     },
     
-    onLoadError: function(){
-    	showMsg("提示信息", "加载远程数据时出错,详情查看日志!!", "warning");
+    onLoadError: function(xhr){
+    	showSessionError(xhr);
     },
 	columns: [columZ],
 	toolbar: [{
@@ -210,6 +210,9 @@ function showHZGJ(){
 				columns: [columH],
 				onDblClickRow: function(index,row){				//双击时
 					EditH(index,"#didGJ",row);
+				},
+				onLoadError: function(xhr){
+				    	showSessionError(xhr);
 				},
 				onRowContextMenu: function(e, index, row){ //右键
 					//选中该行  
@@ -381,19 +384,6 @@ function toMergeZ(num){
 		
 		rowNum1=$('#did').datagrid('getRowIndex',rowsS[0]);
 		rowNum2=$('#did').datagrid('getRowIndex',rowsS[1]);
-		alert(rowNum1+"/"+rowNum2);
-		
-		//刷新表格
-		$('#did').datagrid('reload');
-		
-		//高亮某一行
-		
-    	//$('#did').datagrid('checkRow',((num==1)?(rowNum2-1):rowNum1));
-		//timeoutMsg("信息提醒","幢信息合并成功!",3000,'slide');
-		
-		
-		//console.log(opts);
-		//发送ajax进行合并幢
 		$.messager.confirm('确认对话框',"幢坐落为:<strong>"+(num==1?(rowsS[0].FWZL):(rowsS[1].FWZL))+"</strong>的该条幢下所有户将要被转移且该条幢信息将要被删除,是否确定该操作?", function(r) {
             if (r){
             	$.ajax({
@@ -418,8 +408,8 @@ function toMergeZ(num){
     						showMsg('错误提示','合并信息时,后台程序出错数据已成功回滚,请查看相应日志!','warning')
     					}
     				},
-    				error:function(data){
-    					alert('失败');
+    				error:function(xhr){
+    					showSessionError(xhr);
     				}
     			})
          	   }
@@ -465,34 +455,37 @@ function showDid1(row,row2){
 		},
 		onBeforeLoad:function(){
 			document.getElementById('toFind1').value=keywords1;
-	},
-	onRowContextMenu: function(e, index, row){ //右键 不需要显示 查看幢信息了 因为 已经在幢下进行展示了 
-		//选中该行  
-		$('#windDid1').datagrid('selectRow', index);
+		},
+		onLoadError: function(xhr){
+	    	showSessionError(xhr);
+	    },
+	    onRowContextMenu: function(e, index, row){ //右键 不需要显示 查看幢信息了 因为 已经在幢下进行展示了 
+			//选中该行  
+			$('#windDid1').datagrid('selectRow', index);
+			
+			 $('#mmGJ').menu('show', {
+		            left: e.pageX,
+		            top: e.pageY
+		        });
+			 e.preventDefault(); 
 		
-		 $('#mmGJ').menu('show', {
-	            left: e.pageX,
-	            top: e.pageY
-	        });
-		 e.preventDefault(); 
-		
-		 //右键菜单  
-		$('#mmGJ').menu({    
-			    onClick:function(item){
-			        if(item.text=='查看'||item.text=='编辑'){
-			        	//和查看相同
-			        	EditH(index,"#windDid1",row,'#wind');
-			        }else if(item.text=='刷新'){
-			        	reloadDatagrid('#windDid1');
-			        }else if(item.text=='取消选择'){
-			        	cleanAllCheck('#windDid1');
-			        }else if(item.text=='删除'){
-			        	delHinfo('#windDid1');
-			        }else if(item.text=='查看业务信息'){
-			        	showHDJInfo('#windDid1');
-			        }  
-			    }    
-			});	
+			 //右键菜单  
+			$('#mmGJ').menu({    
+				    onClick:function(item){
+				        if(item.text=='查看'||item.text=='编辑'){
+				        	//和查看相同
+				        	EditH(index,"#windDid1",row,'#wind');
+				        }else if(item.text=='刷新'){
+				        	reloadDatagrid('#windDid1');
+				        }else if(item.text=='取消选择'){
+				        	cleanAllCheck('#windDid1');
+				        }else if(item.text=='删除'){
+				        	delHinfo('#windDid1');
+				        }else if(item.text=='查看业务信息'){
+				        	showHDJInfo('#windDid1');
+				        }  
+				    }    
+				});	
 	},
 	toolbar: [{
 		text:'向下转移',
@@ -599,36 +592,39 @@ function showDid2(row,row1,height){
 			onDblClickRow:function(index,row){
 				EditH(index,"#windDid2",row,'#wind');
 			},
+			onLoadError: function(xhr){
+		    	showSessionError(xhr);
+		    },
 			onBeforeLoad:function(){
 				document.getElementById('toFind2').value=keywords2;
-		},
-		onRowContextMenu: function(e, index, row){ //右键 不需要显示 查看幢信息了 因为 已经在幢下进行展示了 
-			//选中该行  
-			$('#windDid2').datagrid('selectRow', index);
-			
-			 $('#mmGJ').menu('show', {
-		            left: e.pageX,
-		            top: e.pageY
-		        });
-			 e.preventDefault(); 
-			
-			 //右键菜单  
-			$('#mmGJ').menu({    
-				    onClick:function(item){
-				        if(item.text=='查看'||item.text=='编辑'){
-				        	//和查看相同
-				        	EditH(index,"#windDid2",row,'#wind');
-				        }else if(item.text=='刷新'){
-				        	reloadDatagrid('#windDid2');
-				        }else if(item.text=='取消选择'){
-				        	cleanAllCheck('#windDid2');
-				        }else if(item.text=='删除'){
-				        	delHinfo('#windDid2');
-				        }else if(item.text=='查看业务信息'){
-				        	showHDJInfo('#windDid2');
-				        }  
-				    }    
-				});	
+			},
+			onRowContextMenu: function(e, index, row){ //右键 不需要显示 查看幢信息了 因为 已经在幢下进行展示了 
+				//选中该行  
+				$('#windDid2').datagrid('selectRow', index);
+				
+				 $('#mmGJ').menu('show', {
+			            left: e.pageX,
+			            top: e.pageY
+			        });
+				 e.preventDefault(); 
+				
+				 //右键菜单  
+				$('#mmGJ').menu({    
+					    onClick:function(item){
+					        if(item.text=='查看'||item.text=='编辑'){
+					        	//和查看相同
+					        	EditH(index,"#windDid2",row,'#wind');
+					        }else if(item.text=='刷新'){
+					        	reloadDatagrid('#windDid2');
+					        }else if(item.text=='取消选择'){
+					        	cleanAllCheck('#windDid2');
+					        }else if(item.text=='删除'){
+					        	delHinfo('#windDid2');
+					        }else if(item.text=='查看业务信息'){
+					        	showHDJInfo('#windDid2');
+					        }  
+					    }    
+					});	
 		},
 		toolbar: [{
 			text:'向上转移',
@@ -734,6 +730,9 @@ function showDid3(row,height){
 		onDblClickRow:function(index,row){
 			//console.log(row);
 			EditH(index,"#singleDid",row,'#singleWind');
+		},
+		onLoadError: function(xhr){
+		    	showSessionError(xhr);
 		},
 		onBeforeLoad:function(){
 				document.getElementById('toFind3').value=keywords3;
@@ -908,8 +907,8 @@ function ajaxToTransfer(tstybm,rows,info,index){//info是标识符 标识是否�
 					showMsg('错误提醒','操作数据失败,详情请查看错误日志!','warning')
 				}
 			},
-			error:function(data){
-				alert('失败');
+			error:function(xhr){
+				showSessionError(xhr);
 			}
 		})
 	
@@ -967,8 +966,8 @@ function HDJInfo(tstybm){
 			dataR = data.rows;
 			
 		},
-		error:function(data){
-			alert('失败');
+		error:function(xhr){
+			showSessionError(xhr);
 		}
 	}) 
 	return dataR;
@@ -1002,8 +1001,8 @@ function delHinfo(id){
 			              }) 	
 				}
 			},
-			error:function(data){
-				alert('失败');
+			error:function(xhr){
+				showSessionError(xhr);
 			}
 		}) 
 	}
@@ -1166,8 +1165,8 @@ function stillDelH(data,tstybm,id){
 			}
 			
 		},
-		error:function(data){
-			alert('失败');
+		error:function(xhr){
+			showSessionError(xhr);
 		}
 	})
 	
@@ -1192,8 +1191,8 @@ function ajaxToDelH(tstybm,id){
 			}
 			
 		},
-		error:function(data){
-			alert('失败');
+		error:function(xhr){
+			showSessionError(xhr);
 		}
 	})
 }
@@ -1231,8 +1230,8 @@ function toMerge(id1,id2,state){  //id1代表去覆盖 id2代表被覆盖
 					}
 					
 				},
-				error:function(data){
-					alert('失败');
+				error:function(xhr){
+					showSessionError(xhr);
 				}
 			})
 		}
@@ -1271,8 +1270,8 @@ function toMerge(id1,id2,state){  //id1代表去覆盖 id2代表被覆盖
 					}
 					
 				},
-				error:function(data){
-					alert('失败');
+				error:function(xhr){
+					showSessionError(xhr);
 				}
 			})
 		}
@@ -1321,8 +1320,8 @@ function ajaxToMerge(tTstybm,bTstybm,bdcdyh,id1,id2){
 				showMsg('严重错误','合并信息时,后台程序出错数据已成功回滚,请联系开发者查错!','warning')
 			}
 		},
-		error:function(data){
-			alert('失败');
+		error:function(xhr){
+			showSessionError(xhr);
 		}
 	})
 }
@@ -1357,8 +1356,8 @@ function deleteZ(id){
 			              }) 	
 				}
 			},
-			error:function(data){
-				alert('失败');
+			error:function(xhr){
+				showSessionError(xhr);
 			}
 		})
 	}
@@ -1383,18 +1382,10 @@ function ajaxToDelZ(tstybm,id){
 				timeoutMsg("信息提醒",data.msg+"条幢户信息删除成功!",3000,'slide');
 			}
 		},
-		error:function(data){
-			alert('失败');
+		error:function(xhr){
+			showSessionError(xhr);
 		}
 	})
-}
-
-//页面跳转的方法 使用的方法是模拟被点击
-function openUrl(url){
-	var a = $(url).get(0);
-	 var e = document.createEvent('MouseEvents');
-	 e.initEvent('click', true, true);
-	 a.dispatchEvent(e);
 }
 
 //取消选择的行
@@ -1452,8 +1443,8 @@ function splitH(datagrid,windowID){
 					showMsg('严重错误','分割户信息(复制)时后台程序出错,请联系开发者查错!','warning')
 				}
 			},
-			error:function(data){
-				alert('失败');
+			error:function(xhr){
+				showSessionError(xhr);
 			}
 		})
 	}
@@ -1480,6 +1471,15 @@ function showmask(){
     //遮罩层,利用datagrid的遮罩层
     $("<div class=\"datagrid-mask\"></div>").css({display:"block",width:"100%",height:$(window).height()}).appendTo("body"); 
 
+}
+function showSessionError(xhr){
+	if(xhr.status==200){
+		location.reload();
+		//showMsg("提示信息", "当前SESSION过期,请重新登录后打开该页面!", "warning");
+	}
+	else{
+		showMsg("错误提示", "后台程序出错"+xhr.status + " " + xhr.statusText+" 详情请查看日志!", "warning");
+	}
 }
 //取消遮罩层  
 function hidemask(){
