@@ -7,11 +7,10 @@ else
 {// code for IE6, IE5
 xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
 }
-xmlhttp.open("GET","static/xml/property.xml",false);
+xmlhttp.open("GET","static/property.xml",false);
 xmlhttp.send();
 xmlDoc=xmlhttp.responseXML;
 var serverUrl=xmlDoc.getElementsByTagName("serverPath")[0].childNodes[0].nodeValue;
-
 //分页的关键词
 var keywords1="";
 var keywords2="";
@@ -19,8 +18,6 @@ var keywords3="";
 var lsztybm1="";
 var lsztybm2="";
 var lsztybm3="";	
-
-
 //工具条列
 var columH = [
 	{

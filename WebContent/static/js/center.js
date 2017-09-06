@@ -1161,7 +1161,7 @@ function stillDelH(data,tstybm,id){
 				//提醒
 				timeoutMsg("信息提醒",data.msg+"条户信息及相关图属信息删除成功!",3000,'slide');
 			}else{
-				showMsg('严重错误','删除数据失败,后台程序出错,请联系开发者查错!','warning')
+				showMsg('信息提示','删除数据失败!','warning')
 			}
 			
 		},
@@ -1187,7 +1187,7 @@ function ajaxToDelH(tstybm,id){
 				//提醒
 				timeoutMsg("信息提醒",data.msg+"条信息删除成功!",3000,'slide');
 			}else{
-				showMsg('严重错误','删除数据失败,后台程序出错,请联系开发者查错!','warning')
+				showMsg('信息提示','删除数据失败!','warning')
 			}
 			
 		},
@@ -1314,10 +1314,10 @@ function ajaxToMerge(tTstybm,bTstybm,bdcdyh,id1,id2){
 				}
 				
 				
-				timeoutMsg("信息提醒","户信息合并成功!",3000,'slide');
+				timeoutMsg("信息提示","户信息合并成功!",3000,'slide');
 				
 			}else{
-				showMsg('严重错误','合并信息时,后台程序出错数据已成功回滚,请联系开发者查错!','warning')
+				showMsg('信息提示','合并失败!','warning')
 			}
 		},
 		error:function(xhr){
@@ -1346,7 +1346,7 @@ function deleteZ(id){
 				if(data.msg>0){
 					showMsg('友情提示','该幢下存在有效户信息,<br/>不能直接删除,请双击行查看户详情!','warning')
 				}else if (data.msg<0){
-					showMsg('错误提醒','查询幢下是否有户信息时出错,详情请查看错误日志!','warning')
+					showMsg('信息提示','查询幢下是否有户信息时出错,详情请查看错误日志!','warning')
 				}
 				else{
 					$.messager.confirm('确认对话框',"坐落为:<strong>"+rows[0].FWZL+"</strong><br/>的该条幢信息可以被删除,是否确定该操作?", function(r) {
@@ -1374,12 +1374,12 @@ function ajaxToDelZ(tstybm,id){
 		},
 		success:function(data){
 			if(data.msg<=0){
-				showMsg('严重错误','删除幢信息时后台程序出错,详情请查看日志!','warning')
+				showMsg('信息提示','删除幢信息失败,详情请查看日志!','warning')
 			}else {
 				//刷新表格
 				$(id).datagrid('reload');
 				//提醒
-				timeoutMsg("信息提醒",data.msg+"条幢户信息删除成功!",3000,'slide');
+				timeoutMsg("信息提示",data.msg+"条幢户信息删除成功!",3000,'slide');
 			}
 		},
 		error:function(xhr){
@@ -1440,7 +1440,7 @@ function splitH(datagrid,windowID){
 					$(windowID).window('close');//关闭面板
 					openDialog(url,windowID,datagrid);
 				}else{
-					showMsg('严重错误','分割户信息(复制)时后台程序出错,请联系开发者查错!','warning')
+					showMsg('信息提示','分割户信息(复制)失败,详情请查看日志!','warning')
 				}
 			},
 			error:function(xhr){

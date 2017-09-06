@@ -14,7 +14,7 @@ public class DoLog {
 	static Map<String,String> map =null;
 	static Document doc =null;
 	static Object sre = null;
-	public static void doLog(String funName,Object[] params, Object retVal){
+	public static void doLog(String funName,Object[] params, Object retVal, String userName){
 		//对方法名称进行判断
 		switch (funName) {
 		case "toTransfer"://转移
@@ -31,6 +31,7 @@ public class DoLog {
 			}
 			    doc = new Document();
 				doc.append("opTime", GetSystimeDate.getTime())
+				.append("opUser", userName)
 				.append("opType", "转移操作")
 				.append("opIds", new Document().append("被转移户的TSTYBM:",sb.toString()).append("转移到的LSZTYBM:", params[0]))
 				.append("opResult",resultStr);
@@ -42,6 +43,7 @@ public class DoLog {
 			resultStr=FormateData.formateResult(sre, 1);
 		    doc = new Document();
 			doc.append("opTime", GetSystimeDate.getTime())
+			.append("opUser", userName)
 			.append("opType", "普通删除户操作")
 			.append("opIds", new Document().append("被删除户的TSTYBM:",params[0]))
 			.append("opResult",resultStr);
@@ -55,6 +57,7 @@ public class DoLog {
 			resultStr=FormateData.formateResult(sre, 1);
 		    doc = new Document();
 			doc.append("opTime", GetSystimeDate.getTime())
+			.append("opUser", userName)
 			.append("opType", "强制删除户操作")
 			.append("opIds", new Document().append("被删除户的TSTYBM:",params[0]))
 			.append("opResult",resultStr);
@@ -68,6 +71,7 @@ public class DoLog {
 			resultStr=FormateData.formateResult(sre, 1);
 		    doc = new Document();
 			doc.append("opTime", GetSystimeDate.getTime())
+			.append("opUser", userName)
 			.append("opType", "合并户操作")
 			.append("opIds", new Document().append("被合并户的TSTYBM:",params[1])
 					.append("合并至户的TSTYBM", params[0])
@@ -77,12 +81,13 @@ public class DoLog {
 		break;
 		
 		case "splitH":
-			//合并户信息
+			//分割户操作
 			map = gs.fromJson(retVal.toString(), Map.class);
 		    sre = map.get("msg");
 			resultStr=FormateData.formateResult(sre, 1);
 		    doc = new Document();
 			doc.append("opTime", GetSystimeDate.getTime())
+			.append("opUser", userName)
 			.append("opType", "分割户操作")
 			.append("opIds", new Document()
 					.append("被分割户的TSTYBM", params[0])
@@ -98,6 +103,7 @@ public class DoLog {
 			resultStr=FormateData.formateResult(sre, 1);
 		    doc = new Document();
 			doc.append("opTime", GetSystimeDate.getTime())
+			.append("opUser", userName)
 			.append("opType", "删除幢操作")
 			.append("opIds", new Document()
 					.append("被删除幢的TSTYBM", params[0]))
@@ -105,6 +111,21 @@ public class DoLog {
 			MongodbUtil.insertMongo(doc);
 		break;
 		
+		case "toMergeZ":
+			//幢的合并
+			map = gs.fromJson(retVal.toString(), Map.class);
+		    sre = map.get("msg");
+			resultStr=FormateData.formateResult(sre, 1);
+		    doc = new Document();
+			doc.append("opTime", GetSystimeDate.getTime())
+			.append("opUser", userName)
+			.append("opType", "删除幢操作")
+			.append("opIds", new Document()
+					.append("去合并幢的TSTYBM", params[0]))
+					.append("被合并幢的TSTYBM", params[1])
+			.append("opResult",resultStr);
+			MongodbUtil.insertMongo(doc);
+		break;
 		default:
 			break;
 		}

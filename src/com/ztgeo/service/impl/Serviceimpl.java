@@ -75,11 +75,7 @@ public class Serviceimpl implements DataService {
 				 baseSql = "select * from (select a1.*, rownum rn  from (select * from fc_h_qsdc h  where  h.zl like '%"+keyword+"%' order by "+sort+" "+order+") a1 where rownum <= ?) where rn >= ?";
 				
 			}
-			
 		}
-		
-		
-		
 		 params[0]=String.valueOf(end);
 		 params[1]=String.valueOf(star);
 		
@@ -147,8 +143,6 @@ public class Serviceimpl implements DataService {
 		return tojson.getJsonData(jsonarray, total);
 	}
 
-
-
 	@Override
 	public String toTransfer(String tstybm, String[] trows) {
 		//遍历trows数组拿出数据进行执行底层
@@ -165,7 +159,11 @@ public class Serviceimpl implements DataService {
 		String sql ="update fc_h_qsdc set lsztybm='"+tstybm+"' where tstybm in( "+ sb.toString()+" )";
 		System.out.println("转移户的sql语句:"+sql);
 		int resultCount = dao.doExecuteUpdate(sql,new String[0]);
-		//将影响的条数放入json封装对象进行加工成json
+		//释放资源文件
+		dao.closeRecource();
+		dao.closeConn();
+		sb=null;
+		sql=null;
 		return tojson.msgTojson(resultCount);
 	}
 
@@ -174,6 +172,7 @@ public class Serviceimpl implements DataService {
 		JSONArray jsonarray = new JSONArray();
 		String[] params = new String[1];
 		params[0] = tstybm;
+		String busInfoSql;
 		String sql = "select gl.slbh from dj_tsgl gl left join fc_h_qsdc h  on h.tstybm = gl.tstybm where h.tstybm = ?";
 		ResultSet set =dao.getDataByParams(sql, params);
 		//将结果集放入json判断处理
@@ -190,7 +189,7 @@ public class Serviceimpl implements DataService {
 				}
 			}
 			System.out.println("---拼接的sql条件:"+sb);
-		String busInfoSql = 
+			busInfoSql = 
 				"select nvl(zx.djlx,'相关登记注销') djlx,\n" +
 						"       zx.slbh,\n" + 
 						"       zx.xgzh bdczh,\n" + 
@@ -275,7 +274,17 @@ public class Serviceimpl implements DataService {
 		//结果集进行处理
 		jsonarray = tojson.resultToJsonArray(set);
 		}
-		return  tojson.getJsonData(jsonarray,slbhs.size()) ;
+		int size =slbhs.size();
+		//释放资源  
+		params=null;
+		sql=null;
+		slbhs=null;
+		sb=null;
+		busInfoSql=null;
+		busInfoSql=null;
+		dao.closeRecource();
+		dao.closeConn();
+		return  tojson.getJsonData(jsonarray,size) ;
 	}
 
 
@@ -286,16 +295,20 @@ public class Serviceimpl implements DataService {
 		params[0] = tstybm;
 		String sql = "delete from fc_h_qsdc where tstybm =?";
 		int resultCount = dao.doExecuteUpdate(sql, params);
+		//释放资源
+		params=null;
+		sql=null;
+		dao.closeRecource();
+		dao.closeConn();
 		return tojson.msgTojson(resultCount);
 	}
-
-
 
 	@Override
 	public String isCanMerge(String tstybm) {
 		JSONArray jsonarray = new JSONArray();
 		String[] params = new String[1];
 		params[0] = tstybm;
+		String busInfoSql;
 		String sql = "select h.bdcdyh,ts.bdcdyh from fc_h_qsdc h ,dj_tsgl ts where h.tstybm =? and h.tstybm = ts.tstybm";
 		ResultSet set =dao.getDataByParams(sql, params);
 		List<String> bdcdyhs = tojson.isCanMerge(set);
@@ -316,7 +329,7 @@ public class Serviceimpl implements DataService {
 					}
 				}
 				System.out.println("---拼接的sql条件:"+sb);
-				String busInfoSql = 
+			    busInfoSql = 
 						"select nvl(zx.djlx,'相关登记注销') djlx,\n" +
 								"       zx.slbh,\n" + 
 								"       zx.xgzh bdczh,\n" + 
@@ -400,7 +413,15 @@ public class Serviceimpl implements DataService {
 			//结果集进行处理
 			jsonarray = tojson.resultToJsonArray(set);
 			}
+			params=null;
+			busInfoSql=null;
+			sql=null;
+			set=null;
+			sb=null;
 		}
+			//释放资源 
+			dao.closeRecource();
+			dao.closeConn();
 		return tojson.getJsonData(jsonarray,bdcdyhs.size()) ;
 	}
 
@@ -447,10 +468,13 @@ public class Serviceimpl implements DataService {
 				System.out.println("---重设提交方式为自动提交失败");
 				e.printStackTrace();
 			}
-			Jdbc.closeConn();
-			Jdbc.closeResource();
+			dao.closeRecource();
+			dao.closeConn();
 		}
 		System.out.println("---执行合并时替换了"+margeCount+"条,删除了:"+delCount+"条!");
+		//资源释放  
+		params1=null;
+		params2=null;
 		return  tojson.msgTojson(1);
 	}
 
@@ -524,9 +548,10 @@ public class Serviceimpl implements DataService {
 				System.out.println("---重设提交方式为自动提交失败");
 				e.printStackTrace();
 			}
-			Jdbc.closeConn();
-			Jdbc.closeResource();
+			dao.closeRecource();
+			dao.closeConn();
 		}
+		params=null;
 		System.out.println("强制性删除时: 删除户信息:"+delHCount+"条,删除图属信息:"+delTsCount);
 		return tojson.msgTojson(1);
 	}
@@ -537,7 +562,6 @@ public class Serviceimpl implements DataService {
 	public String splitH(String btstybm, String bbdcdyh) {
 		//生成uuid
 		String tstybm = UUID.randomUUID().toString();
-		System.out.println("生成的随机码:"+tstybm);
 		//随机码给日志类赋值
 		DoLog.randomTstybm=tstybm;
 		int insertCount1=0;
@@ -582,10 +606,12 @@ public class Serviceimpl implements DataService {
 				System.out.println("---重设提交方式为自动提交失败");
 				e.printStackTrace();
 			}
-			Jdbc.closeConn();
-			Jdbc.closeResource();
+			dao.closeRecource();
+			dao.closeConn();
 		}
-		
+		tstybm=null;
+		params1=null;
+		params2=null;
 		return tojson.msgTojson(1,tstybm);
 	}
 

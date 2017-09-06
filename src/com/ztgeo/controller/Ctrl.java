@@ -1,46 +1,27 @@
 package com.ztgeo.controller;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-
 import org.springframework.stereotype.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.ztgeo.service.DataService;
-import com.ztgeo.service.impl.Serviceimpl;
-
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
+import com.ztgeo.util.ReadXml;
 
 @Controller
 public class Ctrl {
 	
-	/*private static String keyword="";*/
 	//装配属性
 	@Resource(name="service")
 	private DataService service;
 	
-	
-	//线程保护锁 防止 多个ajax同时进入一个方法
-	private Lock lock = new ReentrantLock();
-	
-	//目标文件转发
 	//目标文件的转发
 	@RequestMapping(value ="/restourl") 
 	public String ResToUrl(String url) {
 		return url;
 	}
-
-
+	
 	//根据关键字 查询 包含分页
 	@RequestMapping(value ="getDataByKeywordAndPage",produces="application/json; charset=utf-8")
 	@ResponseBody
@@ -50,13 +31,7 @@ public class Ctrl {
 			){
 		System.out.println("---关键字"+keyword +"当前页/页面容量:"+page+rows);
 		//如果关键字非空调用底层
-		if(keyword!=null&&keyword.length()!=0){
-		Object obj = service.getDataByKeyWordAndPage(page, rows, sort, order, keyword,category);
-		System.out.println(obj);
-		return obj;
-	}else{
-		return null;
-			} 
+		return service.getDataByKeyWordAndPage(page, rows, sort, order, keyword,category);
 	}
 	
 	
@@ -66,7 +41,7 @@ public class Ctrl {
 		//查看来源  
 		String url = req.getHeader("Referer");
 		System.out.println("url的父级目录:"+url);
-		if("http://localhost:8080/FloorMerge/".equals(url)){//这边写入 补录程序的url
+		if(ReadXml.RefererUrl.equals(url)){
 			//如果关键字非空调用底层
 			System.out.println("进入到的session验证,携带的user属性是:"+user);
 			if(user!=null&&!"".equals(user)){
@@ -75,11 +50,9 @@ public class Ctrl {
 			}else{
 			return "sessionInfo";
 			}
-		
 		}else{
 			return "redirect:/arr.jsp";
 		}
-		
 	}
 	
 	//获得户详情  
@@ -89,13 +62,9 @@ public class Ctrl {
 			@RequestParam(value="sort", required=false) String sort,@RequestParam(value="order", required=false) String order,
 			@RequestParam(value="tstybm",required=false) String tstybm,@RequestParam("keyword") String keyword
 			){
-		lock.lock();
-		System.out.println(tstybm+"获得了锁");
 		System.out.println("tstybm:"+tstybm+"排序方式:"+order);
 		Object obj = service.getDataByParams(page,rows,sort,order,tstybm,keyword);
 		System.out.println("获得的户信息:"+obj);
-		lock.unlock();
-		System.out.println(tstybm+"释放了锁");
 	return obj;
 	}
 	
@@ -108,19 +77,13 @@ public class Ctrl {
 		return service.toTransfer(tstybm,trows);
 	}
 	
-	
-	
-	
 	//查询户信息是否有业务信息产生 toSelectBusiness
 	@RequestMapping(value ="toSelectBusiness",produces="application/json; charset=utf-8")
 	@ResponseBody
 	public String toSelectBusiness(@RequestParam(value="tstybm") String tstybm){
 		System.out.println("统计是否有业务拿到的幢tstybm:"+tstybm);
 		//调用查询条数的底层功能
-		lock.lock();
-		String resultStr = service.toSelectBusiness(tstybm);
-		lock.unlock();
-		return resultStr;
+		return service.toSelectBusiness(tstybm);
 	}
 	
 	//删除户信息
@@ -137,8 +100,7 @@ public class Ctrl {
 	@RequestMapping(value ="stillDelH",produces="application/json; charset=utf-8")
 	@ResponseBody
 	public String stillDelH(@RequestParam(value="tstybm") String tstybm,
-			@RequestParam(value="slbhs") String slbhs	
-			){
+			@RequestParam(value="slbhs") String slbhs){	
 		System.out.println("强制性删除户信息拿到的幢tstybm:"+tstybm+"slbhs是:"+slbhs);
 		//调用查询条数的底层功能
 		return service.stillDelH(tstybm);
@@ -168,8 +130,7 @@ public class Ctrl {
 	//查询是否可以被删除
 	@RequestMapping(value ="isCanDel",produces="application/json; charset=utf-8")
 	@ResponseBody
-	public String isCanDel(@RequestParam(value="tstybm") String tstybm
-			){
+	public String isCanDel(@RequestParam(value="tstybm") String tstybm){
 		System.out.println("删除幢信息查看是否有户信息拿到的tstybm:"+tstybm);
 		//调用查询条数的底层功能   
 		return service.isCanDel(tstybm);
@@ -178,8 +139,7 @@ public class Ctrl {
 	//删除幢
 	@RequestMapping(value ="delZ",produces="application/json; charset=utf-8")
 	@ResponseBody
-	public String delZ(@RequestParam(value="tstybm") String tstybm
-			){
+	public String delZ(@RequestParam(value="tstybm") String tstybm){
 		System.out.println("删除幢信息拿到的tstybm:"+tstybm);
 		//调用查询条数的底层功能   
 		return service.delZ(tstybm);
@@ -188,8 +148,7 @@ public class Ctrl {
 	//合并幢 
 	@RequestMapping(value ="toMergeZ",produces="application/json; charset=utf-8")
 	@ResponseBody
-	public String toMergeZ(@RequestParam(value="tTstybm") String tTstybm,@RequestParam(value="bTstybm") String bTstybm
-			){
+	public String toMergeZ(@RequestParam(value="tTstybm") String tTstybm,@RequestParam(value="bTstybm") String bTstybm){
 		System.out.println("合并幢信息的TSTYBM:"+tTstybm+bTstybm);
 		//调用查询条数的底层功能   
 		return service.toMergeZ(tTstybm,bTstybm);

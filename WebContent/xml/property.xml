@@ -1,8 +1,14 @@
 <?xml version="1.0"?>  
 
 <root>
-	<!-- 主机IP地址 -->
+	<!-- 补录软件地址 -->
 	<serverPath>http://10.13.0.100:8009/</serverPath> 
+	
+	<!-- 本项目访问地址 -->
+	<localUrl>http://192.168.1.104:8080/FloorMerge/</localUrl>
+	
+	<!--程序接入点的url -->
+	<RefererUrl>http://192.168.1.104:8080/FloorMerge/</RefererUrl> 	
 	
 	<!-- 数据库连接URL -->
 	<url>jdbc:oracle:thin:@localhost:1521:orcl</url>
@@ -18,4 +24,6 @@
 	
 	<!--异常log日志的地址  -->
 	<logPath>D:/logError</logPath>
+	
+	
 </root>
