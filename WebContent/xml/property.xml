@@ -2,13 +2,13 @@
 
 <root>
 	<!-- 补录软件地址 -->
-	<serverPath>http://10.13.0.100:8009/</serverPath> 
+	<serverPath>http://10.13.0.100:8081/</serverPath> 
 	
 	<!-- 本项目访问地址 -->
-	<localUrl>http://192.168.1.104:8080/FloorMerge/</localUrl>
+	<localUrl>http://localhost:8080/FloorMerge/</localUrl>
 	
 	<!--程序接入点的url -->
-	<RefererUrl>http://192.168.1.104:8080/FloorMerge/</RefererUrl> 	
+	<RefererUrl>http://localhost:8080/FloorMerge/</RefererUrl> 	
 	
 	<!-- 数据库连接URL -->
 	<url>jdbc:oracle:thin:@localhost:1521:orcl</url>
@@ -19,11 +19,22 @@
 	<!-- 数据库连接密码 -->
 	<password>BDCSXK</password>
 
-	<!-- mongoDb的连接地址  localhost-->
-	<mongodbUrl></mongodbUrl>
+	<!-- mongoDb的连接地址  localhost 不使用日志记载的时候 为空即可-->
+	<mongodbUrl>localhost</mongodbUrl>
 	
 	<!--异常log日志的地址  -->
 	<logPath>D:/logError</logPath>
 	
+	<!--  mongodDB使用的数据库名称-->
+	<mongoDBName>FloorMerge</mongoDBName>
+	
+	<!-- mongoDB使用的集合名称 -->
+	<collName>FloorMergeLog</collName>
+	
+	<!-- 删除幢存入的备份表名称 -->
+	<Ztable>FC_Z_QSDC_ZBF</Ztable>
+	
+	<!-- 删除户存入的备份表名称 -->
+	<Htable>FC_H_QSDC_HBF</Htable>
 	
 </root>

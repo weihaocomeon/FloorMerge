@@ -15,7 +15,7 @@
 		<!-- <label class='find'>按楼盘搜索:</label> -->
 		<select id="reqStr" class="easyui-combobox" name="dept" style="width:200px;height:30px">   
 	    <option value="f1">按楼盘搜索</option>   
-	    <option value="f2">按图书统一编码搜索</option>   
+	    <option value="f2">按图属统一编码搜索</option>   
 	    <option value="f3">按宗地统一编码搜索</option>   
 		</select>  
 		<input id="ss" ></input> 
@@ -26,7 +26,7 @@
    
    <!--户幢信息挂接-->
     <div id='findDivH' class="findDiv" style="display: none;">		
-			<label class='find'>按户坐落搜索:</label>
+			<label class='find'><strong>按户坐落搜索:</strong></label>
 			<input id="ssH" ></input> 
 		</div>
    <div id='findHinfo'>

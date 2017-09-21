@@ -12,8 +12,8 @@ public class MongodbUtil {
 
 	public static void insertMongo(Document doc){
 		MongoClient mongoClient = new MongoClient(ReadXml.mongodbUrl);
-		MongoDatabase database = mongoClient.getDatabase("mydb");
-		MongoCollection<Document> col = database.getCollection("users");
+		MongoDatabase database = mongoClient.getDatabase(ReadXml.mongoDBName);
+		MongoCollection<Document> col = database.getCollection(ReadXml.collName);
 		col.insertOne(doc);
 	}
 	

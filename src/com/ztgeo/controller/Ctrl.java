@@ -26,22 +26,22 @@ public class Ctrl {
 	@RequestMapping(value ="getDataByKeywordAndPage",produces="application/json; charset=utf-8")
 	@ResponseBody
 	public Object  getDataByKeywordAndPage(@RequestParam(value="page", required=false) String page,@RequestParam(value="rows", required=false) String rows,
-			@RequestParam(value="sort", required=false) String sort,@RequestParam(value="order", required=false) String order,@RequestParam(value="keyword") String keyword,
+			@RequestParam(value="sort", required=false) String sort,@RequestParam(value="order", required=false) String order,@RequestParam(value="keyword",required=false) String keyword,
 			@RequestParam(value="category", required=false) String category
 			){
 		System.out.println("---关键字"+keyword +"当前页/页面容量:"+page+rows);
 		//如果关键字非空调用底层
-		return service.getDataByKeyWordAndPage(page, rows, sort, order, keyword,category);
+			return service.getDataByKeyWordAndPage(page, rows, sort, order, keyword,category);
 	}
 	
 	
 	//根据关键字 查询 包含分页
 	@RequestMapping("saveSession")
 	public String saveSession(@RequestParam(value="user", required=false) String user,HttpServletRequest req,HttpSession session){
-		//查看来源  
+		//查看来源   本地服务器可以访问
 		String url = req.getHeader("Referer");
 		System.out.println("url的父级目录:"+url);
-		if(ReadXml.RefererUrl.equals(url)){
+		if(ReadXml.RefererUrl.equals(url)||ReadXml.localUrl.equals(url)){
 			//如果关键字非空调用底层
 			System.out.println("进入到的session验证,携带的user属性是:"+user);
 			if(user!=null&&!"".equals(user)){
@@ -64,7 +64,6 @@ public class Ctrl {
 			){
 		System.out.println("tstybm:"+tstybm+"排序方式:"+order);
 		Object obj = service.getDataByParams(page,rows,sort,order,tstybm,keyword);
-		System.out.println("获得的户信息:"+obj);
 	return obj;
 	}
 	
@@ -100,7 +99,7 @@ public class Ctrl {
 	@RequestMapping(value ="stillDelH",produces="application/json; charset=utf-8")
 	@ResponseBody
 	public String stillDelH(@RequestParam(value="tstybm") String tstybm,
-			@RequestParam(value="slbhs") String slbhs){	
+			@RequestParam(value="slbhs") String slbhs,@RequestParam(value="row") String row){	
 		System.out.println("强制性删除户信息拿到的幢tstybm:"+tstybm+"slbhs是:"+slbhs);
 		//调用查询条数的底层功能
 		return service.stillDelH(tstybm);

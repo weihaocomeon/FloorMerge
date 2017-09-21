@@ -42,9 +42,9 @@
 	</filter-mapping>
     
    <!-- session时间设置 -->
-   <session-config>
+  <!--  <session-config>
 		<session-timeout>1</session-timeout>
-	</session-config> 
+	</session-config>  -->
 	
 	<error-page>  
         <error-code>404</error-code>  

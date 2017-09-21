@@ -32,6 +32,8 @@ $("#did").datagrid({
 	striped:true,
 	autoRowHeight:true,
 	nowrap: true,	
+	pageSize:10,
+	pageList:[10,100,200],
 	pagination:true,
 	remoteSort:true,//服务器排序
 	multiSort:false,
@@ -77,6 +79,9 @@ $("#did").datagrid({
     },
 	
 	onBeforeLoad: function (param) {  //查看是否是首次加载 如果是 则 不执行url 加载数据
+		/*if(param.keyword == undefined){
+			return false;
+		}*/
         var firstLoad = $(this).attr("firstLoad");  
         if (firstLoad == "false" || typeof (firstLoad) == "undefined")  
         {  
@@ -164,10 +169,13 @@ function showHZGJ(){
 		var m ;
 	//查看按钮当前状态	
 	if($("a[id='hwzz'").children("span:eq(0)").children("span:eq(0)").get()[0].innerText=="户幢挂接"){
+		//前置动作 聚焦页面
+		
 		//1.改变搜索框上层 div可见性 	
 		$("#findDivH").css("display","block");
 		//设置表格上的div可见
 		$('#findHinfo').css('display','block');
+		
 		
 		//2.渲染搜索框  
 		$('#ssH').searchbox({ 
@@ -188,7 +196,8 @@ function showHZGJ(){
 				}, 
 			}); 
 		$('#ssH').searchbox('clear');  
-		
+		$("#_easyui_textbox_input4")[0].focus();//id改变了  所以 id变了
+		//$("#ssH").focus();
 		//3.改变按键名称
 		$("a[id='hwzz'").children("span:eq(0)").children("span:eq(0)").get()[0].innerText='隐藏户幢挂接';
 		//4.显示表格并加载数据  
@@ -201,7 +210,9 @@ function showHZGJ(){
 				fitColumns:false,
 				striped:true,
 				autoRowHeight:true,
-				nowrap: true,	
+				nowrap: true,
+				pageSize:10,
+				pageList:[10,100,200],
 				pagination:true,
 				remoteSort:true,//服务器排序
 				multiSort:false,
@@ -358,7 +369,8 @@ function showWindow(id,title){
 	//调用遮盖层 
 	showmask();
 	$(id).window({
-		module:true,
+		width: "80%", 
+		module:false,
 		collapsible:true,
 		title:title,
 		onClose: function(){
@@ -424,7 +436,7 @@ function showDid1(row,row2){
 	lsztybm1=row.TSTYBM;
 	//户信息的详情页数据表格
 	$('#pan1').panel({
-		title:row.FWZL+'>'+row.ZDTYBM,
+		title:row.FWZL+'>'+row.TSTYBM,
 		width:'100%',
 		height:'50%',
 		border:false,
@@ -439,13 +451,13 @@ function showDid1(row,row2){
 		rownumbers:true,
 		fit:true ,
 		loadMsg:'数据加载中...',
-		pagePosition:'top',
+		//pagePosition:'top',
 		striped:true,
 		singleSelect:false,
 		nowrap: true,
 		selectOnCheck:true,
 		checkOnSelect:true,
-		pageList:[3,5,10],
+		pageList:[30,100,200],pageSize:100,
 		pagination:true,
 		remoteSort:true,//服务器排序
 		multiSort:false,//禁止多列排序允许 目前该工具只做到可以单列排序 多列允许排序但只遵循单列规则
@@ -564,7 +576,7 @@ function showDid2(row,row1,height){
 		lsztybm2=row.TSTYBM;
 		//户信息的详情页数据表格
 		$('#pan2').panel({
-			title:row.FWZL+'>'+row.ZDTYBM,
+			title:row.FWZL+'>'+row.TSTYBM,
 			width:'100%',
 			height:height,
 			border:false,
@@ -585,7 +597,7 @@ function showDid2(row,row1,height){
 			selectOnCheck:true,
 			checkOnSelect:true,
 			pagination:true,
-			pageList:[3,5,10],
+			pageList:[30,100,200],pageSize:100,
 			remoteSort:true,//服务器排序
 			multiSort:false,//禁止多列排序允许 目前该工具只做到可以单列排序 多列允许排序但只遵循单列规则
 			columns: [columH],
@@ -723,7 +735,7 @@ function showDid3(row,height){
 		selectOnCheck:true,
 		loadMsg:'数据加载中...',
 		checkOnSelect:true,
-		pageList:[3,5,10],
+		pageList:[30,100,200],pageSize:100,
 		remoteSort:true,//服务器排序
 		multiSort:false,//禁止多列排序允许 目前该工具只做到可以单列排序 多列允许排序但只遵循单列规则
 		columns: [columH],
@@ -1014,7 +1026,7 @@ function delHinfo(id){
 function showQl(data,tstybm,id){
 	//显示dialog
 	$('#busDialog').dialog({    
-	    title: '警告:&nbsp&nbsp该条信息有如下权证信息存在,是否继续删除?',    
+	    title: '警告:&nbsp&nbsp该条信息有如下权证信息存在,不允许被删除!',    
 	    width: "80%",    
 	    height: "30%",
 	    minimizable:true,
@@ -1024,14 +1036,16 @@ function showQl(data,tstybm,id){
 	    closed: false,  
 	    constrain:true,
 	    modal:true,
-	    buttons:[{
+	    buttons:[
+	    	/*{
 			text:'继续删除',
 			iconCls:'icon-closer',
 			handler:function(){
 				//发送ajax批量删除
 				stillDelH(data,tstybm,id);
 			}
-		},{
+		},*/
+		{
 			text:'关闭',
 			iconCls:'icon-close',
 			handler:function(){
@@ -1058,16 +1072,18 @@ function showQLinfo(heightBig,id1,data1,height1,title1,id2,data2,height2,title2)
 	//显示dialog
 	$('#busDialog').dialog({    
 	    title:'权属信息详情',  
-	    top:'10%',
-		left:'10%',
-	    width: "80%",    
+	       
 	    height: heightBig,
 	    minimizable:true,
-	    maximizable:true,
+	    maximizable:false,
 	    resizable:true,
 	    closed: false,  
 	    constrain:false,
-	    modal:false
+	    modal:true,
+	    top:'10%',
+		left:'10%',
+	    width: "80%", 
+	    zIndex:999,
 
 	});    
 	//显示数据表格
@@ -1379,7 +1395,7 @@ function ajaxToDelZ(tstybm,id){
 				//刷新表格
 				$(id).datagrid('reload');
 				//提醒
-				timeoutMsg("信息提示",data.msg+"条幢户信息删除成功!",3000,'slide');
+				timeoutMsg("信息提示",data.msg+"条幢信息删除成功!",3000,'slide');
 			}
 		},
 		error:function(xhr){

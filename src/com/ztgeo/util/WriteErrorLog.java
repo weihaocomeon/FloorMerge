@@ -31,6 +31,9 @@ public class WriteErrorLog {
 			filedir.mkdirs();
 		}
 		File file = new File(filedir,"FloorMergeErrorLog.log");
+		if(!file.exists()){
+			file.createNewFile();
+		}
 		FileOutputStream out = new FileOutputStream(file,true);
 		//日志参数
 		StringBuffer sb=new StringBuffer();
