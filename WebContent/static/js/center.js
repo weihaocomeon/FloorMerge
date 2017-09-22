@@ -196,7 +196,7 @@ function showHZGJ(){
 				}, 
 			}); 
 		$('#ssH').searchbox('clear');  
-		$("#_easyui_textbox_input4")[0].focus();//id改变了  所以 id变了
+		$('#ssH').next().children()[1].focus();//id改变了  所以 id变了
 		//$("#ssH").focus();
 		//3.改变按键名称
 		$("a[id='hwzz'").children("span:eq(0)").children("span:eq(0)").get()[0].innerText='隐藏户幢挂接';
@@ -402,11 +402,13 @@ function toMergeZ(num){
     				url:'toMergeZ',
     				type:'post',
     				dataType:'json',
+    				beforeSend: showLoad(),
     				data:{
     					tTstybm:(num==1?s2:s1),//去合并
     					bTstybm:(num==1?s1:s2),//被合并删除
     				},
     				success:function(data){
+    					hideLoad();
     					if(data.msg==1){
     						//刷新表格
     						$('#did').datagrid('reload');
@@ -417,10 +419,11 @@ function toMergeZ(num){
 							}; 
     						timeoutMsg("信息提醒","幢信息合并成功!",3000,'slide');
     					}else{
-    						showMsg('错误提示','合并信息时,后台程序出错数据已成功回滚,请查看相应日志!','warning')
+    						showMsg('错误提示','合并信息时出错,数据已成功回滚,请查看相应日志!','warning')
     					}
     				},
     				error:function(xhr){
+    					hideLoad();
     					showSessionError(xhr);
     				}
     			})
@@ -894,11 +897,13 @@ function ajaxToTransfer(tstybm,rows,info,index){//info是标识符 标识是否�
 			url:'toTransfer',
 			type:'post',
 			dataType:'json',
+			beforeSend: showLoad(),
 			data:{
 				tstybm:tstybm,
 				trows:trows
 			},
 			success:function(data){
+				hideLoad();
 				if(data.msg>=1){
 					//刷新表格
 					if(info=='户幢挂接')	{
@@ -920,6 +925,7 @@ function ajaxToTransfer(tstybm,rows,info,index){//info是标识符 标识是否�
 				}
 			},
 			error:function(xhr){
+				hideLoad();
 				showSessionError(xhr);
 			}
 		})
@@ -979,6 +985,7 @@ function HDJInfo(tstybm){
 			
 		},
 		error:function(xhr){
+			hideLoad();
 			showSessionError(xhr);
 		}
 	}) 
@@ -1014,6 +1021,7 @@ function delHinfo(id){
 				}
 			},
 			error:function(xhr){
+				hideLoad();
 				showSessionError(xhr);
 			}
 		}) 
@@ -1165,11 +1173,13 @@ function stillDelH(data,tstybm,id){
 		url:'stillDelH',
 		type:'post',
 		dataType:'json',
+		beforeSend: showLoad(),
 		data:{
 			tstybm:tstybm,
 			slbhs:slbhs
 		},
 		success:function(data){
+			hideLoad();
 			if(data.msg==1){
 				//刷新表格
 				$(id).datagrid('reload');
@@ -1182,6 +1192,7 @@ function stillDelH(data,tstybm,id){
 			
 		},
 		error:function(xhr){
+			hideLoad();
 			showSessionError(xhr);
 		}
 	})
@@ -1192,11 +1203,13 @@ function ajaxToDelH(tstybm,id){
 	$.ajax({
 		url:'delH',
 		type:'post',
+		beforeSend: showLoad(),
 		dataType:'json',
 		data:{
 			tstybm:tstybm,
 		},
 		success:function(data){
+			hideLoad();
 			if(data.msg>=1){
 				//刷新表格
 				$(id).datagrid('reload');
@@ -1208,6 +1221,7 @@ function ajaxToDelH(tstybm,id){
 			
 		},
 		error:function(xhr){
+			hideLoad();
 			showSessionError(xhr);
 		}
 	})
@@ -1247,6 +1261,7 @@ function toMerge(id1,id2,state){  //id1代表去覆盖 id2代表被覆盖
 					
 				},
 				error:function(xhr){
+					hideLoad();
 					showSessionError(xhr);
 				}
 			})
@@ -1287,6 +1302,7 @@ function toMerge(id1,id2,state){  //id1代表去覆盖 id2代表被覆盖
 					
 				},
 				error:function(xhr){
+					hideLoad();
 					showSessionError(xhr);
 				}
 			})
@@ -1305,17 +1321,18 @@ function hideLoad(){
 }
 
 function ajaxToMerge(tTstybm,bTstybm,bdcdyh,id1,id2){
-	console.log("bdcdyh:"+bdcdyh);
 	$.ajax({
 		url:'toMergeH',
 		type:'post',
 		dataType:'json',
+		beforeSend: showLoad(),
 		data:{
 			tTstybm:tTstybm,
 			bTstybm:bTstybm,
 			bdcdyh:bdcdyh,
 		},
 		success:function(data){
+			hideLoad();
 			if(data.msg==1){
 				//如果表格存在 则关闭表格
 				if($('#busDialog').dialog()!=undefined){
@@ -1333,10 +1350,11 @@ function ajaxToMerge(tTstybm,bTstybm,bdcdyh,id1,id2){
 				timeoutMsg("信息提示","户信息合并成功!",3000,'slide');
 				
 			}else{
-				showMsg('信息提示','合并失败!','warning')
+				showMsg('信息提示','合并户失败,数据已回滚!','warning')
 			}
 		},
 		error:function(xhr){
+			hideLoad();
 			showSessionError(xhr);
 		}
 	})
@@ -1355,10 +1373,12 @@ function deleteZ(id){
 			url:'isCanDel',
 			type:'post',
 			dataType:'json',
+			beforeSend: showLoad(),
 			data:{
 				tstybm:rows[0].TSTYBM,
 			},	
 			success:function(data){
+				hideLoad();
 				if(data.msg>0){
 					showMsg('友情提示','该幢下存在有效户信息,<br/>不能直接删除,请双击行查看户详情!','warning')
 				}else if (data.msg<0){
@@ -1373,6 +1393,7 @@ function deleteZ(id){
 				}
 			},
 			error:function(xhr){
+				hideLoad();
 				showSessionError(xhr);
 			}
 		})
@@ -1385,10 +1406,12 @@ function ajaxToDelZ(tstybm,id){
 		url:'delZ',
 		type:'post',
 		dataType:'json',
+		beforeSend: showLoad(),
 		data:{
 			tstybm:tstybm,
 		},
 		success:function(data){
+			hideLoad();
 			if(data.msg<=0){
 				showMsg('信息提示','删除幢信息失败,详情请查看日志!','warning')
 			}else {
@@ -1399,6 +1422,7 @@ function ajaxToDelZ(tstybm,id){
 			}
 		},
 		error:function(xhr){
+			hideLoad();
 			showSessionError(xhr);
 		}
 	})
@@ -1446,11 +1470,13 @@ function splitH(datagrid,windowID){
 			url:'splitH',
 			type:'post',
 			dataType:'json',
+			beforeSend: showLoad(),
 			data:{
 				btstybm:rows[0].TSTYBM,
 				bbdcdyh:rows[0].BDCDYH,
 			},
 			success:function(data){
+				hideLoad();
 				if(data.msg>=1){
 					var url = serverUrl+"/WorkArea/HouseInfo?H_ID="+data.tstybm;
 					$(windowID).window('close');//关闭面板
@@ -1460,6 +1486,7 @@ function splitH(datagrid,windowID){
 				}
 			},
 			error:function(xhr){
+				hideLoad();
 				showSessionError(xhr);
 			}
 		})
@@ -1494,10 +1521,11 @@ function showSessionError(xhr){
 		//showMsg("提示信息", "当前SESSION过期,请重新登录后打开该页面!", "warning");
 	}
 	else{
-		showMsg("错误提示", "后台程序出错"+xhr.status + " " + xhr.statusText+" 详情请查看日志!", "warning");
+		showMsg("错误提示", "错误信息:"+xhr.status + " " + xhr.statusText+" 详情请查看日志!", "warning");
 	}
 }
 //取消遮罩层  
 function hidemask(){
     $(".datagrid-mask").hide();
 }
+

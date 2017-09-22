@@ -21,7 +21,7 @@ var lsztybm3="";
 //工具条列
 var columH = [
 	{
-        field: 'LSFWBH',
+        field: 'TSTYBM',
         checkbox:true,
         width: '3%',
       },
@@ -110,7 +110,7 @@ var columH = [
              width: '4%'
           },
           {
-              field: 'LSFWBM',
+              field: 'LSFWBH',
               title: '隶属房屋编号',
               width: '10%',
            },

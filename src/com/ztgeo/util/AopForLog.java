@@ -68,13 +68,18 @@ public class AopForLog {
 					DoLog.doLog(funName, args,retVal,user.toString());
 				}
 			}
+		 //释放资源
+		 req=null;
+		 user=null;
+		 funName=null;
+		 args=null;
 				return  retVal;
 	}
 	
 	//抛出异常后执行
 	@AfterThrowing(pointcut="myPointCut()",throwing="e")//抛异常记录txt日志
 	public void afterThrow(JoinPoint jointPoint,Exception e){
-		System.out.println("---进入切面编程");
+		System.out.println("---进入切面编程异常记载");
 		//判断输出日志级别
 		if(log.isErrorEnabled()){
 			log.info("afterThrow"+jointPoint+"\t"+e.getMessage());
@@ -88,5 +93,6 @@ public class AopForLog {
 		
 		//写入异常日志
 		WriteErrorLog.writeLog(ErrorMsg.toString(), jointPoint, e);
+		
 	}
 }

@@ -458,25 +458,17 @@ public class Serviceimpl implements DataService {
 	//合并的功能
 	@Override
 	public String toMergeH(String tTstybm, String bTstybm,String bdcdyh) {
-		int margeCount;
-		int delCount;
 		
 		//1.更新图属 a房子的业务 全部挂接给b
-		String[] params1 = new String[3];
-		params1[0] = tTstybm;
-		params1[1] = bdcdyh;
-		params1[2] = bTstybm;
-		String sql1 = "update dj_tsgl ts set ts.tstybm  =?,ts.bdcdyh = ? where ts.tstybm = ?";
+		String sql1 = "update dj_tsgl ts set ts.tstybm  ='"+tTstybm+"',ts.bdcdyh = '"+bdcdyh+"' where ts.tstybm = '"+bTstybm+"'";
 		
 		
 		//2.保存被删除的户 信息
-		//String sql3 = "insert into fc_h_qsdc"
+		String sql2 = "insert into "+ReadXml.Htable+" select * from fc_h_qsdc t where tstybm='"+bTstybm+"'";
 		
 		
 		//3.删除户信息
-		String[] params2 = new String[1];
-		params2[0] = bTstybm;
-		String sql2 = "delete from fc_h_qsdc h where h.tstybm =?";
+		String sql3 = "delete from fc_h_qsdc h where h.tstybm ='"+bTstybm+"'";
 		
 		
 		//需要设置手动提交的处理方式
@@ -485,10 +477,12 @@ public class Serviceimpl implements DataService {
 		try {
 			conn.setAutoCommit(false);
 			//执行替换tstybm的工作
-			margeCount = dao.doExecuteUpdateNotAuto(sql1,params1);
-			//执行删除户的操作
-			delCount = dao.doExecuteUpdateNotAuto(sql2,params2);
-		if((margeCount!=-1)&&(delCount!=-1&&delCount!=0)){
+		int	margeCount1 = dao.doExecuteUpdateNotAuto(sql1);
+			//保存删除的户操作
+		int	margeCount2 = dao.doExecuteUpdateNotAuto(sql2);
+			//删除户
+		int	margeCount3 = dao.doExecuteUpdateNotAuto(sql3);
+		if((margeCount1>0)&&(margeCount2>0)&&(margeCount3>0)){
 			//全部执行则提交
 			conn.commit();
 		}else{
@@ -509,10 +503,11 @@ public class Serviceimpl implements DataService {
 			}
 			dao.closeRecource();
 			dao.closeConn();
+			sql1=null;
+			sql2=null;
+			sql3=null;
 		}
 		//资源释放  
-		params1=null;
-		params2=null;
 		return  tojson.msgTojson(1);
 	}
 
