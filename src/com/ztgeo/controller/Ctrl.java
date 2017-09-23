@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.ztgeo.service.DataService;
+import com.ztgeo.util.FormateData;
 import com.ztgeo.util.ReadXml;
 
 @Controller
@@ -40,8 +41,8 @@ public class Ctrl {
 	public String saveSession(@RequestParam(value="user", required=false) String user,HttpServletRequest req,HttpSession session){
 		//查看来源   本地服务器可以访问
 		String url = req.getHeader("Referer");
-		System.out.println("url的父级目录:"+url);
-		if(ReadXml.RefererUrl.equals(url)||ReadXml.localUrl.equals(url)){
+		System.out.println("url的父级目录:"+url+"重组后的字符串:"+FormateData.getPPath(url));
+		if(ReadXml.RefererUrl.equals(FormateData.getPPath(url))||ReadXml.localUrl.equals(url)){
 			//如果关键字非空调用底层
 			System.out.println("进入到的session验证,携带的user属性是:"+user);
 			if(user!=null&&!"".equals(user)){

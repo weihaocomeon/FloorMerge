@@ -13,8 +13,15 @@ $('#reqStr').combobox({
 			if(!value||""==value.trim()){
 				showMsg("提示信息", "请输入关键字后搜索", "warning");
 			}else{
-				var category = $('#reqStr').combobox('getValue');
-				$("#did").datagrid("reload",{category:category,keyword:value});
+				//验证是否非法字符
+				re= /select|update|delete|exec|count|'|"|=|;/i;
+				if( re.test(value)){
+					showMsg("提示信息", "包含非法字符,请重新输入!!!", "warning");
+				}else{
+					var category = $('#reqStr').combobox('getValue');
+					$("#did").datagrid("reload",{category:category,keyword:value});
+				}
+				
 			}
 			}, 
 		}); 
@@ -190,10 +197,14 @@ function showHZGJ(){
 				if(!value||""==value.trim()){
 					showMsg("提示信息", "请输入户坐落后搜索", "warning");
 				}else{				
-					m = $('#ssH').searchbox('getValue');
 					
+					re= /select|update|delete|exec|count|'|"|=|;/i;
+					if( re.test(value)){
+						showMsg("提示信息", "包含非法字符,请重新输入!!!", "warning");
+					}else{
 					//重新加载数据 带参数
-					$('#didGJ').datagrid('reload',{keyword: m,});
+					$('#didGJ').datagrid('reload',{keyword: value,});
+					}
 				}
 				}, 
 			}); 

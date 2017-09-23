@@ -312,7 +312,7 @@ public class Serviceimpl implements DataService {
 			
 			try {
 				//3.采用httpclient访问 缓存的删除
-				JSONObject resultObj = HttpGetC.delZwithHttpGet(tstybm);
+				JSONObject resultObj = HttpGetC.delZwithHttpGet(tstybm,"H");
 				isSuccess = (boolean) resultObj.get("IsSuccess");
 			} catch (Exception e) {
 				System.out.println("捕捉httpget异常,已回滚");
@@ -493,7 +493,7 @@ public class Serviceimpl implements DataService {
 		boolean isSuccess;
 			try {
 				//3.采用httpclient访问 缓存的删除
-				JSONObject resultObj = HttpGetC.delZwithHttpGet(bTstybm);
+				JSONObject resultObj = HttpGetC.delZwithHttpGet(bTstybm,"H");
 				isSuccess = (boolean) resultObj.get("IsSuccess");
 			} catch (Exception e) {
 				System.out.println("捕捉httpget异常,已回滚");
@@ -560,7 +560,7 @@ public class Serviceimpl implements DataService {
 			boolean isSuccess;
 			try {
 				//3.采用httpclient访问 缓存的删除
-				JSONObject resultObj = HttpGetC.delZwithHttpGet(tstybm);
+				JSONObject resultObj = HttpGetC.delZwithHttpGet(tstybm,"Z");
 				isSuccess = (boolean) resultObj.get("IsSuccess");
 			} catch (Exception e) {
 				System.out.println("捕捉httpget异常,已回滚");
@@ -745,7 +745,7 @@ public class Serviceimpl implements DataService {
 			//3.采用httpclient访问 缓存的删除
 			try {
 				//3.采用httpclient访问 缓存的删除
-				JSONObject resultObj = HttpGetC.delZwithHttpGet(bTstybm);
+				JSONObject resultObj = HttpGetC.delZwithHttpGet(bTstybm,"Z");
 				isSuccess = (boolean) resultObj.get("IsSuccess");
 			} catch (Exception e) {
 				System.out.println("捕捉httpget异常,已回滚");

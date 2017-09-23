@@ -8,4 +8,10 @@ public class FormateData {
 		}
 		return "失败";
 	}
+	
+	public static String getPPath(String url){
+		//按照冒号进行分割
+		String bb[] = url.split("/");
+		return new String(bb[0]+bb[1]+"//"+bb[2]+"/");
+	}
 }
