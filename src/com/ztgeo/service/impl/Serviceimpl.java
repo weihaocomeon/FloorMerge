@@ -300,17 +300,27 @@ public class Serviceimpl implements DataService {
 		//1.保存被删除的户信息
 		String sql1 = "insert into "+ReadXml.Htable+" select * from fc_h_qsdc t where tstybm='"+tstybm+"'";
 		//2.删除户信息
-		String sql2 = "delete from fc_h_qsdc where tstybm ='"+tstybm+"'";
+		//String sql2 = "delete from fc_h_qsdc where tstybm ='"+tstybm+"'";
 		//释放资源
 		Connection conn = dao.getConn();
 		try {
 		conn.setAutoCommit(false);
 			int insertCount1 = dao.doExecuteUpdateNotAuto(sql1);
 			//执行删除户的操作
-			int insertCount2 = dao.doExecuteUpdateNotAuto(sql2);
+			//int insertCount2 = dao.doExecuteUpdateNotAuto(sql2);
+			boolean isSuccess;
 			
-				
-				if(insertCount1!=-1&&insertCount1>0&&insertCount2>0&&insertCount2!=-1){
+			try {
+				//3.采用httpclient访问 缓存的删除
+				JSONObject resultObj = HttpGetC.delZwithHttpGet(tstybm);
+				isSuccess = (boolean) resultObj.get("IsSuccess");
+			} catch (Exception e) {
+				System.out.println("捕捉httpget异常,已回滚");
+				conn.rollback();
+				System.out.println("--执行合并有部分语句执行失败,数据已回滚");
+				return tojson.msgTojson(-1);
+			}
+				if(insertCount1>0&&isSuccess){
 						conn.commit();
 					System.out.println("删除户成功!");
 					
@@ -324,7 +334,6 @@ public class Serviceimpl implements DataService {
 				e.printStackTrace();
 			}finally {
 				sql1=null;
-				sql2=null;
 				
 				dao.closeRecource();
 				dao.closeConn();
@@ -467,8 +476,8 @@ public class Serviceimpl implements DataService {
 		String sql2 = "insert into "+ReadXml.Htable+" select * from fc_h_qsdc t where tstybm='"+bTstybm+"'";
 		
 		
-		//3.删除户信息
-		String sql3 = "delete from fc_h_qsdc h where h.tstybm ='"+bTstybm+"'";
+		//3.删除户信息无需删除 传递户id
+		//String sql3 = "delete from fc_h_qsdc h where h.tstybm ='"+bTstybm+"'";
 		
 		
 		//需要设置手动提交的处理方式
@@ -481,8 +490,18 @@ public class Serviceimpl implements DataService {
 			//保存删除的户操作
 		int	margeCount2 = dao.doExecuteUpdateNotAuto(sql2);
 			//删除户
-		int	margeCount3 = dao.doExecuteUpdateNotAuto(sql3);
-		if((margeCount1>0)&&(margeCount2>0)&&(margeCount3>0)){
+		boolean isSuccess;
+			try {
+				//3.采用httpclient访问 缓存的删除
+				JSONObject resultObj = HttpGetC.delZwithHttpGet(bTstybm);
+				isSuccess = (boolean) resultObj.get("IsSuccess");
+			} catch (Exception e) {
+				System.out.println("捕捉httpget异常,已回滚");
+				conn.rollback();
+				System.out.println("--执行合并有部分语句执行失败,数据已回滚");
+				return tojson.msgTojson(-1);
+			}
+		if((margeCount1>-1)&&(margeCount2>0)&&isSuccess){
 			//全部执行则提交
 			conn.commit();
 		}else{
@@ -505,7 +524,6 @@ public class Serviceimpl implements DataService {
 			dao.closeConn();
 			sql1=null;
 			sql2=null;
-			sql3=null;
 		}
 		//资源释放  
 		return  tojson.msgTojson(1);
@@ -531,16 +549,14 @@ public class Serviceimpl implements DataService {
 		Connection conn = dao.getConn();
 		String baseSql1 = "insert into "+ReadXml.Ztable+" f select * from fc_z_qsdc z where z.tstybm='"+tstybm+"'";
 		
-		String baseSql2 = "delete from fc_z_qsdc z where z.tstybm ='"+tstybm+"'";
+		//String baseSql2 = "delete from fc_z_qsdc z where z.tstybm ='"+tstybm+"'";
 		try {
 			conn.setAutoCommit(false);
 			//1.插入被删除的表
 			
 			int insertCount1 = dao.doExecuteUpdateNotAuto(baseSql1);
-			//执行删除户的操作
-			int insertCount2 = dao.doExecuteUpdateNotAuto(baseSql2);
-			
-			
+			//执行删除幢的操作
+			//int insertCount2 = dao.doExecuteUpdateNotAuto(baseSql2);
 			boolean isSuccess;
 			try {
 				//3.采用httpclient访问 缓存的删除
@@ -552,7 +568,7 @@ public class Serviceimpl implements DataService {
 				System.out.println("--执行合并有部分语句执行失败,数据已回滚");
 				return tojson.msgTojson(-1);
 			}
-		if((insertCount1>0)&&(insertCount2>0)&&(isSuccess)){
+		if((insertCount1>0)&&(isSuccess)){
 			//全部执行则提交
 			System.out.println("访问补录删除幢成功!");
 
@@ -574,7 +590,6 @@ public class Serviceimpl implements DataService {
 				e.printStackTrace();
 			}
 			baseSql1=null;
-			baseSql2=null;
 			dao.closeConn();
 			dao.closeRecource();
 		}
@@ -710,7 +725,7 @@ public class Serviceimpl implements DataService {
 				//"update fc_h_qsdc t set t.lsztybm ='"+tTstybm+"' where t.lsztybm = '"+bTstybm+"'";
 		
 		//删除幢
-		String baseSql2 = "delete from fc_z_qsdc t where t.tstybm ='"+bTstybm+"'";
+		//String baseSql2 = "delete from fc_z_qsdc t where t.tstybm ='"+bTstybm+"'";
 		
 		
 		
@@ -724,7 +739,7 @@ public class Serviceimpl implements DataService {
 			//2.执行替换tstybm的工作
 			int insertCount1 = dao.doExecuteUpdateNotAuto(baseSql1);
 			//执行删除户的操作
-			int insertCount2 = dao.doExecuteUpdateNotAuto(baseSql2);
+			//int insertCount2 = dao.doExecuteUpdateNotAuto(baseSql2);
 			
 			boolean isSuccess;
 			//3.采用httpclient访问 缓存的删除
@@ -738,7 +753,7 @@ public class Serviceimpl implements DataService {
 				System.out.println("--执行合并有部分语句执行失败,数据已回滚");
 				return tojson.msgTojson(-1);
 			}
-		if((insertCount1>0)&&(insertCount1>0)&&(insertCount2>0)&&(isSuccess)){
+		if((insertCount0>0)&&(insertCount1>-1)&&isSuccess){
 			//全部执行则提交
 			System.out.println("访问补录删除幢成功!");
 
@@ -761,7 +776,6 @@ public class Serviceimpl implements DataService {
 			}
 			baseSql0=null;
 			baseSql1=null;
-			baseSql2=null;
 			dao.closeConn();
 			dao.closeRecource();
 		}

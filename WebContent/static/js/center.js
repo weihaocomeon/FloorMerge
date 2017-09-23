@@ -133,6 +133,8 @@ $("#did").datagrid({
 		iconCls:'icon-down',	
 		handler: function(){
 			toMergeZ(1);
+			//发送请求  
+				
 		}
 	},
 	'-',
@@ -398,10 +400,13 @@ function toMergeZ(num){
 		rowNum2=$('#did').datagrid('getRowIndex',rowsS[1]);
 		$.messager.confirm('确认对话框',"幢坐落为:<strong>"+(num==1?(rowsS[0].FWZL):(rowsS[1].FWZL))+"</strong>的该条幢下所有户将要被转移且该条幢信息将要被删除,是否确定该操作?", function(r) {
             if (r){
+            	var tTstybm=(num==1?s2:s1);
+            	var bTstybm=(num==1?s1:s2);
             	$.ajax({
     				url:'toMergeZ',
     				type:'post',
     				dataType:'json',
+    				async: false,
     				beforeSend: showLoad(),
     				data:{
     					tTstybm:(num==1?s2:s1),//去合并
@@ -410,6 +415,28 @@ function toMergeZ(num){
     				success:function(data){
     					hideLoad();
     					if(data.msg==1){
+    						/*//var url = serverUrl+"/WorkArea/HouseInfo?H_ID="+data.tstybm;
+    						//发送删除的请求
+    						 $.getJSON(serverUrl+"Building/DeleteZ",{TSTYBM:bTstybm},function(arry){});	
+    						 
+    						 	*/
+    						/* $.ajax({  
+    					          type: 'GET',  
+    					          url: serverUrl+"Building/DeleteZ?TSTYBM="+bTstybm+"aaa",  
+    					          async: false,  
+    					          dataType: "jsonp",  
+    					          jsonp: "callback",//传递给请求处理程序或页面的，用以获得jsonp回调函数名的参数名(一般默认为:callback)  
+    					          jsonpCallback:"callback",//自定义的jsonp回调函数名，默认未jquery自动生成的随机函数名，也可以写“?”jquery会自动处理  
+    					          success: function(o){  
+    					              alert("success");  
+    					              console.log(o);  
+    					          } ,
+    					          error: function(o){
+    					        	  alert("失败");
+    					        	  console.log(0);
+    					          }
+    					    });  */
+    						
     						//刷新表格
     						$('#did').datagrid('reload');
     						
